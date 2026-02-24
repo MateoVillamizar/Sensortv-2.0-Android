@@ -5,8 +5,8 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 
 @Composable
-fun MenuScreen(navController: NavHostController) {
+fun CaptureScreen(navController: NavHostController) {
 
-    // Pantalla inicial de la aplicación
-    Text("Pantalla Menu")
+    // Pantalla de captura de datos
+    Text("Pantalla de captura de datos")
 }

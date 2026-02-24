@@ -5,8 +5,8 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 
 @Composable
-fun MenuScreen(navController: NavHostController) {
+fun HistoryScreen(navController: NavHostController) {
 
-    // Pantalla inicial de la aplicación
-    Text("Pantalla Menu")
+    // Pantalla de historial de registros de datos capturados
+    Text("Pantalla de historial de registros")
 }

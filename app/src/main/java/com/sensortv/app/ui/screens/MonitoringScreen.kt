@@ -5,8 +5,8 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 
 @Composable
-fun MenuScreen(navController: NavHostController) {
+fun MonitoringScreen(navController: NavHostController) {
 
-    // Pantalla inicial de la aplicación
-    Text("Pantalla Menu")
+    // Pantalla de monitoreo de sensores
+    Text("Pantalla Monitoreo / Gráfica")
 }
