@@ -7,6 +7,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -19,8 +20,11 @@ fun MenuScreen(navController: NavHostController) {
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("SensorTV 2.0") }
+            CenterAlignedTopAppBar(
+                title = { Text("SensorTV 2.0") },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    titleContentColor = Color(0xFF1F3A8A)
+                )
             )
         }
     ) { innerPadding ->
@@ -57,7 +61,11 @@ fun MenuScreen(navController: NavHostController) {
                 onClick = {
                     navController.navigate(AppRoutes.Monitoring.route)
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF1F3A8A), // Color de fondo del botón
+                    contentColor = Color.White           // Color del texto del botón
+                )
             ) {
                 Text("Monitorear Sensores")
             }
@@ -66,7 +74,11 @@ fun MenuScreen(navController: NavHostController) {
                 onClick = {
                     navController.navigate(AppRoutes.History.route)
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF1F3A8A), // Color de fondo del botón
+                    contentColor = Color.White           // Color del texto del botón
+                )
             ) {
                 Text("Consultar Historial")
             }

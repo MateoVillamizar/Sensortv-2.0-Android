@@ -19,6 +19,7 @@ private val DarkColorScheme = darkColorScheme(
 
 private val LightColorScheme = lightColorScheme(
     primary = Purple40,
+    onPrimary = PrimaryTextColor, // Integramos el color azúl 0xFF1F3A8A
     secondary = PurpleGrey40,
     tertiary = Pink40
 
