@@ -23,7 +23,7 @@ fun AppNavHost(navController: NavHostController) {
     ) {
 
         composable(AppRoutes.Menu.route) {
-            MenuScreen(navController)
+            MainMenuScreen(navController)
         }
 
         composable(AppRoutes.Monitoring.route) {
