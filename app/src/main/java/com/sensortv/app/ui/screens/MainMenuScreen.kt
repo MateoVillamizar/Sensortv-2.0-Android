@@ -14,8 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.sensortv.app.data.repository.SensorInfo
+import com.sensortv.app.ui.components.AppButton
 import com.sensortv.app.ui.components.StandardTopBar
 import com.sensortv.app.ui.navigation.AppRoutes
 
@@ -76,36 +75,20 @@ fun MainMenuScreen(navController: NavHostController) {
 
             SensorTableCard(sensors)
 
-            // CAMBIAR
-            Button(
-                onClick = {
-                    navController.navigate(AppRoutes.Monitoring.route)
-                },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF1F3A8A), // Color de fondo del botón
-                    contentColor = Color.White           // Color del texto del botón
-                )
-            ) {
-                Text("Monitorear Sensores")
-            }
+            AppButton(
+                text = "Monitorear Sensores",
+                onClick = { navController.navigate(AppRoutes.Monitoring.route) },
+                isPrimary = true
+            )
 
-            Button(
-                onClick = {
-                    navController.navigate(AppRoutes.History.route)
-                },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF1F3A8A), // Color de fondo del botón
-                    contentColor = Color.White           // Color del texto del botón
-                )
-            ) {
-                Text("Consultar Historial")
-            }
+            AppButton(
+                text = "Consultar Historial",
+                onClick = { navController.navigate(AppRoutes.History.route) },
+                isPrimary = false
+            )
         }
     }
 }
-
 
 /**
  * Componente Card que muestra la información de la batería en tiempo real.
@@ -252,6 +235,7 @@ private fun RowScope.TableCell(
         )
     }
 }
+
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
