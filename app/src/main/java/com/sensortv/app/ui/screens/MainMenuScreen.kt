@@ -27,7 +27,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -56,7 +55,7 @@ fun MainMenuScreen(navController: NavHostController) {
                 .padding(16.dp)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(28.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
 
@@ -115,11 +114,18 @@ private fun BatteryInfoCard(
             ) {
             Text(
                 text = "Información de la Batería",
+                modifier = Modifier.padding(top = 8.dp),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            Text("Porcentaje de Batería: $batteryPercentage%")
-            Text("Voltaje (tiempo real): $batteryVoltage V")
+            Text(
+                text = "Porcentaje de Batería: $batteryPercentage%",
+                style = MaterialTheme.typography.bodyLarge
+            )
+            Text(
+                text = "Voltaje (tiempo real): $batteryVoltage V",
+                style = MaterialTheme.typography.bodyLarge
+            )
         }
     }
 }
@@ -137,9 +143,19 @@ private fun SensorTableCard(sensors: List<SensorInfo>) {
             containerColor = MaterialTheme.colorScheme.surface
         )
     ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            SensorTableHeader()
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                text = "Sensores Detectados",
+                modifier = Modifier.fillMaxWidth().padding(12.dp),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center
+            )
 
+            SensorTableHeader()
             HorizontalDivider(Modifier, DividerDefaults.Thickness, MaterialTheme.colorScheme.outline)
 
             sensors.forEach { sensor ->
@@ -151,7 +167,6 @@ private fun SensorTableCard(sensors: List<SensorInfo>) {
 
 /**
  * Componente Row que define la cabecera (header) de la tabla de sensores.
- *
  */
 @Composable
 private fun SensorTableHeader() {
@@ -166,13 +181,15 @@ private fun SensorTableHeader() {
     ) {
         TableCell("Tipo de Sensor", weight = 1.4f, isHeader = true)
 
-        VerticalDivider(modifier = Modifier
+        VerticalDivider(
+            modifier = Modifier
             .fillMaxHeight()
             .width(1.dp), color = MaterialTheme.colorScheme.outline)
 
         TableCell("Estado", weight = 1.2f, isHeader = true)
 
-        VerticalDivider(modifier = Modifier
+        VerticalDivider(
+            modifier = Modifier
             .fillMaxHeight()
             .width(1.dp), color = MaterialTheme.colorScheme.outline)
 
@@ -203,13 +220,15 @@ private fun SensorRow(sensor: SensorInfo) {
     ) {
         TableCell(sensor.sensorType, weight = 1.4f, textColor = availabilityColor)
 
-        VerticalDivider(modifier = Modifier
+        VerticalDivider(
+            modifier = Modifier
             .fillMaxHeight()
             .width(1.dp), color = MaterialTheme.colorScheme.outline)
 
         TableCell(availabilityText, weight = 1.2f, textColor = availabilityColor)
 
-        VerticalDivider(modifier = Modifier
+        VerticalDivider(
+            modifier = Modifier
             .fillMaxHeight()
             .width(1.dp), color = MaterialTheme.colorScheme.outline)
 
@@ -241,7 +260,12 @@ private fun RowScope.TableCell(
         Text(
             text = text,
             textAlign = TextAlign.Center,
-            fontWeight = if (isHeader) FontWeight.Bold else FontWeight.Normal,
+
+            style = if (isHeader)
+                MaterialTheme.typography.titleSmall
+            else
+                MaterialTheme.typography.bodyLarge,
+
             color = textColor ?:
             if (isHeader)
                 MaterialTheme.colorScheme.primary

@@ -6,8 +6,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
 
 /**
  * Componente de la barra superior estándar para las pantallas de la aplicación.
@@ -21,8 +19,7 @@ fun StandardTopBar(topTitle: String) {
         title = {
             Text(
                 text = topTitle,
-                fontWeight = FontWeight.Bold,
-                fontSize = 35.sp,
+                style = MaterialTheme.typography.headlineSmall
             )
         },
         colors = TopAppBarDefaults.topAppBarColors(
