@@ -15,9 +15,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
@@ -101,7 +103,11 @@ private fun BatteryInfoCard(
     batteryPercentage: Int,
     batteryVoltage: Double
 ) {
-    Card {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    ) {
         Column(
             modifier = Modifier.padding(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -109,8 +115,8 @@ private fun BatteryInfoCard(
             ) {
             Text(
                 text = "Información de la Batería",
-                color = Color.Black,
-                fontWeight = FontWeight.Bold
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface
             )
             Text("Porcentaje de Batería: $batteryPercentage%")
             Text("Voltaje (tiempo real): $batteryVoltage V")
@@ -126,12 +132,15 @@ private fun BatteryInfoCard(
 @Composable
 private fun SensorTableCard(sensors: List<SensorInfo>) {
     Card (
-        modifier = Modifier.padding(4.dp)
+        modifier = Modifier.padding(4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             SensorTableHeader()
 
-            HorizontalDivider(Modifier, DividerDefaults.Thickness, DividerDefaults.color)
+            HorizontalDivider(Modifier, DividerDefaults.Thickness, MaterialTheme.colorScheme.outline)
 
             sensors.forEach { sensor ->
                 SensorRow(sensor)
@@ -159,13 +168,13 @@ private fun SensorTableHeader() {
 
         VerticalDivider(modifier = Modifier
             .fillMaxHeight()
-            .width(1.dp), color = DividerDefaults.color)
+            .width(1.dp), color = MaterialTheme.colorScheme.outline)
 
         TableCell("Estado", weight = 1.2f, isHeader = true)
 
         VerticalDivider(modifier = Modifier
             .fillMaxHeight()
-            .width(1.dp), color = DividerDefaults.color)
+            .width(1.dp), color = MaterialTheme.colorScheme.outline)
 
         TableCell("Consumo (mA)", isHeader = true)
     }
@@ -179,30 +188,32 @@ private fun SensorTableHeader() {
 @Composable
 private fun SensorRow(sensor: SensorInfo) {
 
-    val AvailabilityText =
+    val availabilityText =
         if (sensor.isAvailable) "Disponible" else "No disponible"
 
-    val AvailibilityColor =
-        if (sensor.isAvailable) Color(0xFF1F3A8A) else Color.Gray
-
+    val availabilityColor =
+        if (sensor.isAvailable)
+            MaterialTheme.colorScheme.onSurfaceVariant
+        else
+            MaterialTheme.colorScheme.outline
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(IntrinsicSize.Min)
     ) {
-        TableCell(sensor.SensorType, weight = 1.4f)
+        TableCell(sensor.sensorType, weight = 1.4f, textColor = availabilityColor)
 
         VerticalDivider(modifier = Modifier
             .fillMaxHeight()
-            .width(1.dp), color = DividerDefaults.color)
+            .width(1.dp), color = MaterialTheme.colorScheme.outline)
 
-        TableCell(AvailabilityText, weight = 1.2f, textColor = AvailibilityColor)
+        TableCell(availabilityText, weight = 1.2f, textColor = availabilityColor)
 
         VerticalDivider(modifier = Modifier
             .fillMaxHeight()
-            .width(1.dp), color = DividerDefaults.color)
+            .width(1.dp), color = MaterialTheme.colorScheme.outline)
 
-        TableCell("${sensor.Sensorpower} mA", textColor = AvailibilityColor)
+        TableCell("${sensor.sensorpower} mA", textColor = availabilityColor)
     }
 }
 
@@ -231,7 +242,11 @@ private fun RowScope.TableCell(
             text = text,
             textAlign = TextAlign.Center,
             fontWeight = if (isHeader) FontWeight.Bold else FontWeight.Normal,
-            color = textColor ?: if (isHeader) Color.Black else Color(0xFF1F3A8A)
+            color = textColor ?:
+            if (isHeader)
+                MaterialTheme.colorScheme.primary
+            else
+                MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }

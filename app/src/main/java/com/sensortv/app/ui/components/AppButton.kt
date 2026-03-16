@@ -22,7 +22,6 @@ import androidx.compose.ui.unit.dp
  * @param modifier Modificadores para personalizar el diseño del botón.
  * @param isPrimary Indica si el botón es de alto énfasis (true) o de énfasis medio (false).
  * @param enabled Indica si el botón está habilitado para ser interactuado.
- * @param icon Icono a mostrar en el botón (opcional).
  */
 @Composable
 fun AppButton(
@@ -50,7 +49,7 @@ fun AppButton(
                 text = text,
                 // Aplica automáticamente 14.sp y otros lineamientos de M3
                 style = MaterialTheme.typography.labelLarge,
-                color = Color.White
+                color = MaterialTheme.colorScheme.onPrimary
             )
         }
     }
@@ -64,8 +63,8 @@ fun AppButton(
                 .height(48.dp),
             enabled = enabled,
             colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
             ),
             shape = ButtonDefaults.shape
         ) {

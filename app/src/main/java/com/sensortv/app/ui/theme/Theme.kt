@@ -1,47 +1,63 @@
 package com.sensortv.app.ui.theme
 
-import android.app.Activity
-import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = Primary,
+    secondary = Secondary,
+    tertiary = Tertiary
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    onPrimary = PrimaryTextColor, // Integramos el color azúl 0xFF1F3A8A
-    secondary = PurpleGrey40,
-    tertiary = Pink40,
-    background = Color.White
 
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    // Colores principales de la identidad de la app (botones principales, acciones importantes)
+    primary = Primary,
+    onPrimary = OnPrimary,
+    primaryContainer = PrimaryContainer,
+    onPrimaryContainer = OnPrimaryContainer,
+
+    // Colores para acciones secundarias y elementos interactivos de menor énfasis
+    secondary = Secondary,
+    onSecondary = OnSecondary,
+    secondaryContainer = SecondaryContainer,
+    onSecondaryContainer = OnSecondaryContainer,
+
+    // Colores para elementos complementarios o visualización de datos
+    tertiary = Tertiary,
+    onTertiary = OnTertiary,
+    tertiaryContainer = TertiaryContainer,
+    onTertiaryContainer = OnTertiaryContainer,
+
+    // Colores para estados de error o advertencia en la aplicación
+    error = Error,
+    onError = onError,
+    errorContainer = ErrorContainerRed,
+    onErrorContainer = onErrorContainer,
+
+    // Colores del fondo principal de las pantallas
+    background = BackgroundLight,
+    onBackground = OnSurface,
+
+    // Colores de superficies como Cards, tablas o contenedores de información
+    surface = Surface,
+    onSurface = OnSurface,
+    surfaceDim = SurfaceDim,
+    onSurfaceVariant = onSurfaceVariant,
+
+    // Color utilizado para bordes, divisores y elementos de separación
+    outline = Outline
 )
 
 @Composable
 fun SensorTV20Theme(
-
-    // Ignoramos el tema oscuro por ahora.
-
     /*
+    No se Implementa el tema oscuro o dinámico
     darkTheme: Boolean = isSystemInDarkTheme(),
     Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
@@ -49,8 +65,15 @@ fun SensorTV20Theme(
 
     content: @Composable () -> Unit
 ) {
-    // Se fuerza siempre el tema claro
+    // Forzar siempre el tema claro
     val colorScheme = LightColorScheme
+
+    // Configura la barra de estado del sistema para mostrar iconos oscuros
+    val view = LocalView.current
+    SideEffect {
+        val window = (view.context as android.app.Activity).window
+        WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = true
+    }
 
     /*
     val colorScheme = when {
@@ -62,8 +85,7 @@ fun SensorTV20Theme(
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
-
-     */
+    */
 
     MaterialTheme(
         colorScheme = colorScheme,
