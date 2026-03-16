@@ -4,17 +4,24 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -25,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,6 +42,7 @@ import androidx.navigation.compose.rememberNavController
 import com.sensortv.app.model.SensorMonitorInfo
 import com.sensortv.app.ui.components.AppButton
 import com.sensortv.app.ui.components.StandardTopBar
+import com.sensortv.app.ui.components.getSensorIcon
 import com.sensortv.app.ui.navigation.AppRoutes
 
 /**
@@ -48,15 +57,14 @@ fun MonitoringScreen(navController: NavHostController) {
         topBar = { StandardTopBar("Monitoreo de Sensores") }
     ) { innerPadding ->
 
-        Column(
+        LazyColumn(
             modifier = Modifier
-                .padding(innerPadding)
-                .padding(16.dp)
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
+                .padding(innerPadding),
+            contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
+            horizontalAlignment = Alignment.CenterHorizontally
+        ){
             // Lista de sensores en monitoreo (simulada)
             val sensors = listOf(
                 SensorMonitorInfo("Acelerómetro", "Bosch BMA400", 0.2f, 12.3f),
@@ -64,29 +72,46 @@ fun MonitoringScreen(navController: NavHostController) {
                 SensorMonitorInfo("Proximidad", "Liteon LTR553", 0.1f, 2.1f)
             )
 
-            GeneralInfoCard(
-                batteryPercent = 84,
-                batteryVoltage = 4.1,
-                sensorsAvailable = sensors.size,
-                averagePower = 23.7f
-            )
+            item {
+                GeneralInfoCard(
+                    batteryPercent = 84,
+                    batteryVoltage = 4.1,
+                    sensorsAvailable = sensors.size,
+                    averagePower = 23.7f
+                )
+            }
 
-            PowerChartPlaceholder()
-            Spacer(modifier = Modifier.height(16.dp))
+            item { PowerChartPlaceholder() }
 
-            SensorListSection(sensors)
+            item { Spacer(modifier = Modifier.height(8.dp)) }
 
-            AppButton(
-                text = "Captura de Datos",
-                onClick = { navController.navigate(AppRoutes.Capture.route) },
-                isPrimary = true,
-            )
+            item {
+                Text(
+                    text = "Sensores en monitoreo",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+            items(sensors) { sensor ->
+                SensorExpandableInfoCard(sensor)
+            }
 
-            AppButton(
-                text = "Volver",
-                onClick = { navController.navigate(AppRoutes.Menu.route) },
-                isPrimary = false
-            )
+            item { Spacer(modifier = Modifier.height(8.dp)) }
+
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
+                AppButton(
+                    text = "Captura de Datos",
+                    onClick = { navController.navigate(AppRoutes.Capture.route) },
+                    isPrimary = true,
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                AppButton(
+                    text = "Volver",
+                    onClick = { navController.navigate(AppRoutes.Menu.route) },
+                    isPrimary = false
+                )
+            }
         }
     }
 }
@@ -100,7 +125,7 @@ private fun PowerChartPlaceholder() {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(150.dp),
+                .height(750.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -170,6 +195,7 @@ private fun GeneralInfoCard(
 @Composable
 private fun SensorExpandableInfoCard(sensor: SensorMonitorInfo) {
 
+    // Estado que controla si la tarjeta está expandida o colapsada
     var expanded by remember { mutableStateOf(false) }
 
     Card(
@@ -180,7 +206,6 @@ private fun SensorExpandableInfoCard(sensor: SensorMonitorInfo) {
             .fillMaxWidth()
             .padding(4.dp)
     ) {
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -189,19 +214,30 @@ private fun SensorExpandableInfoCard(sensor: SensorMonitorInfo) {
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
+                Icon(
+                    imageVector = getSensorIcon(sensor.name),
+                    contentDescription = sensor.name,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+
                 Text(
                     text = sensor.name,
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
                 )
 
-                Text(
-                    text = if (expanded) "▲" else "▼",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary,
+                Icon(
+                    imageVector = Icons.Default.ExpandMore,
+                    contentDescription = "Expandir",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.rotate(
+                        // Rota la flecha 180° si la tarjeta está expandida, 0° si está colapsada
+                        if (expanded) 180f else 0f
+                    )
                 )
             }
 
