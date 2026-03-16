@@ -5,7 +5,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 
 /**
- * Devuelve el icono correspondiente para un tipo de sensor específico
+ * Función que devuelve el icono correspondiente para un tipo de sensor específico
  *
  * @param sensorName Nombre del tipo de sensor.
  * @return El icono correspondiente al tipo de sensor.
