@@ -32,7 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.sensortv.app.data.repository.SensorInfo
+import com.sensortv.app.model.SensorInfo
 import com.sensortv.app.ui.components.AppButton
 import com.sensortv.app.ui.components.StandardTopBar
 import com.sensortv.app.ui.navigation.AppRoutes
@@ -232,7 +232,7 @@ private fun SensorRow(sensor: SensorInfo) {
             .fillMaxHeight()
             .width(1.dp), color = MaterialTheme.colorScheme.outline)
 
-        TableCell("${sensor.sensorpower} mA", textColor = availabilityColor)
+        TableCell("${sensor.sensorPower} mA", textColor = availabilityColor)
     }
 }
 
@@ -279,7 +279,7 @@ private fun RowScope.TableCell(
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun MenuScreenPreview() {
-    //  Un NavHostController simulado para el preview
+    // Un NavHostController simulado para el preview
     val dummyNavController = rememberNavController()
     MainMenuScreen(navController = dummyNavController)
 }

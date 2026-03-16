@@ -1,4 +1,4 @@
-package com.sensortv.app.data.repository
+package com.sensortv.app.model
 
 /**
  * Representa la información básica al detectar un sensor.
@@ -6,5 +6,5 @@ package com.sensortv.app.data.repository
 data class SensorInfo(
     val sensorType: String,
     val isAvailable: Boolean,
-    val sensorpower: Float
+    val sensorPower: Float
 )

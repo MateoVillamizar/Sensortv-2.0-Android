@@ -13,21 +13,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.sensortv.app.ui.components.AppButton
+import com.sensortv.app.ui.components.StandardTopBar
 import com.sensortv.app.ui.navigation.AppRoutes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MonitoringScreen(navController: NavHostController) {
-
     Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("Monitoreo de Sensores") },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    titleContentColor = Color(0xFF1F3A8A)
-                )
-            )
-        }
+        topBar = { StandardTopBar("Monitoreo de Sensores") }
     ) { innerPadding ->
 
         Column(
@@ -39,6 +33,16 @@ fun MonitoringScreen(navController: NavHostController) {
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            // Simulación de gráfica
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(430.dp)
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("Gráfica (simulada)")
+            }
 
             // Datos simulados de sensores
             Card {
@@ -55,42 +59,18 @@ fun MonitoringScreen(navController: NavHostController) {
                 }
             }
 
-            // Simulación de gráfica
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(430.dp)
-                    .background(Color.LightGray),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("Gráfica (simulada)")
-            }
+            AppButton(
+                text = "Captura de Datos",
+                onClick = { navController.navigate(AppRoutes.Capture.route) },
+                isPrimary = true,
+            )
 
-            Button(
-                onClick = {
-                    navController.navigate(AppRoutes.Capture.route)
-                },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF1F3A8A), // Color de fondo del botón
-                    contentColor = Color.White           // Color del texto del botón
-                )
-            ) {
-                Text("Captura de Datos")
-            }
-
-            OutlinedButton(
-                onClick = {
-                    navController.popBackStack()
-                },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.White,
-                    contentColor = Color(0xFF1F3A8A)
-                )
-            ) {
-                Text("Volver")
-            }
+            //Posible cambio a outlinedButton
+            AppButton(
+                text = "Volver",
+                onClick = { navController.navigate(AppRoutes.Menu.route) },
+                isPrimary = false
+            )
         }
     }
 }
@@ -98,7 +78,7 @@ fun MonitoringScreen(navController: NavHostController) {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun MonitoringScreenPreview() {
-    // Se crea un NavHostController simulado
+    // Un NavHostController simulado para el preview
     val dummyNavController = rememberNavController()
     MonitoringScreen(navController = dummyNavController)
 }
