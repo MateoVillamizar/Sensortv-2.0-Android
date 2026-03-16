@@ -1,40 +1,50 @@
 package com.sensortv.app.ui.screens
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.sensortv.app.model.Record
+import com.sensortv.app.ui.components.AppButton
+import com.sensortv.app.ui.components.StandardTopBar
 
+/**
+ * Pantalla que muestra el historial de registros de datos capturados.
+ * Permite exportar y ver los registros.
+ *
+ * @param navController Controlador de navegación utilizado para cambiar de pantalla.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreen(navController: NavHostController) {
 
-    // Datos simulados (luego vendrán del repository)
+    // Datos simulados (luego vendrán del repository - Capa de data)
     val records = listOf(
-        Record("Registro_2026-02-18_14-30.csv", "18/02/2026"),
-        Record("Registro_2026-02-20_09-00.csv", "20/02/2026"),
-        Record("Registro_2026-02-20_16-45.csv", "20/02/2026"),
-        Record("Registro_2026-02-21_11-10.csv", "21/02/2026")
+        Record(1, "Registro_2026-02-18_14-30.csv", "18/02/2026"),
+        Record(2, "Registro_2026-02-20_09-00.csv", "20/02/2026"),
+        Record(3, "Registro_2026-02-20_16-45.csv", "20/02/2026"),
+        Record(4, "Registro_2026-02-21_11-10.csv", "21/02/2026")
     )
 
     Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("Historial de Registros") },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    titleContentColor = Color(0xFF1F3A8A)
-                )
-            )
-        }
+        topBar = { StandardTopBar("Historial de Registros") }
     ) { innerPadding ->
 
         LazyColumn(
@@ -44,63 +54,82 @@ fun HistoryScreen(navController: NavHostController) {
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
             items(records) { record ->
-
-                Card {
-                    Column(
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-
-                        Text(text = record.fileName)
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(text = "Fecha: ${record.date}")
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Button(
-                                onClick = { /* futura exportación */ },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(0xFF1F3A8A),
-                                    contentColor = Color.White
-                                )
-                            ) {
-                                Text("Exportar")
-                            }
-
-                            OutlinedButton(
-                                onClick = { /* futura vista detalle */ },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color.White,
-                                    contentColor = Color(0xFF1F3A8A)
-                                )
-                            ) {
-                                Text("Ver")
-                            }
-                        }
-                    }
-                }
+                HistoryRecordCard(
+                    record = record,
+                    onExport = { /* Futura acción al exportar */ },
+                    onView = { /* Futura acción al ver */ }
+                )
             }
 
             item {
                 Spacer(modifier = Modifier.height(24.dp))
-
-                OutlinedButton(
+                AppButton(
+                    text = "Volver",
                     onClick = { navController.popBackStack() },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.White,
-                        contentColor = Color(0xFF1F3A8A)
-                    )
-                ) {
-                    Text("Volver")
-                }
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Componente Card que muestra un registro de datos capturados con la posibilidad de exportar y ver.
+ *
+ * @param record Información del registro.
+ * @param onExport Callback invocado al exportar un registro.
+ * @param onView Callback invocado al ver un registro.
+ */
+@Composable
+fun HistoryRecordCard(
+    record: Record,
+    onExport: () -> Unit,
+    onView: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Text(
+                text = record.fileName,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Text(
+                text = "ID: ${record.id}",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            Text(
+                text = "Fecha: ${record.date}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+
+                AppButton(
+                    text = "Exportar",
+                    onClick = onExport,
+                    isPrimary = true
+                )
+
+                AppButton(
+                    text = "Ver",
+                    onClick = onView,
+                    isPrimary = false
+                )
             }
         }
     }
@@ -109,7 +138,6 @@ fun HistoryScreen(navController: NavHostController) {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun HistoryScreenPreview() {
-    // Se crea un NavHostController simulado
     val dummyNavController = rememberNavController()
     HistoryScreen(navController = dummyNavController)
 }
