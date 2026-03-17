@@ -11,7 +11,6 @@ import com.sensortv.app.model.SensorData
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -39,6 +38,8 @@ class SensorViewModel(
     val sensorChartData: StateFlow<List<SensorChartData>> = _sensorChartData
     private var lastChartUpdate: Long = 0
 
+    private val startTime = System.currentTimeMillis()
+
     init {
         observeSensors()
         observeBattery()
@@ -58,7 +59,7 @@ class SensorViewModel(
                 // Solo se ejecuta si han pasado x milisegundos desde la última actualización
                 val currentTime = System.currentTimeMillis()
                 if (currentTime - lastChartUpdate >= 3000) {
-                    updateChartData(newData)
+                    updateChartData(_sensorList.value)
                     lastChartUpdate = currentTime
                 }
             }
@@ -87,7 +88,8 @@ class SensorViewModel(
                         sensor.copy(
                             values = newData.values,
                             frequencyHz = newData.frequencyHz,
-                            available = true
+                            available = true,
+                            estimatedPowerMw = newData.estimatedPowerMw
                         )
                     } else sensor // Los demás sensores no cambian
                 }
@@ -98,37 +100,79 @@ class SensorViewModel(
         }
     }
 
-    private fun updateChartData(newData: SensorData) {
-        val currentTime = System.currentTimeMillis()
-        val newPoint = SensorChartPoint(
-            timeStamp = currentTime,
-            powerMw = newData.nominalConsumptionmA
-        )
+//    private fun updateChartData(newData: SensorData) {
+//        // Convertimos el tiempo actual en "segundos desde que inició la app"
+//        val elapsedSeconds = (System.currentTimeMillis() - startTime) / 1000f
+//
+//        val newPoint = SensorChartPoint(
+//            timeStamp = elapsedSeconds,
+//            powerMw = newData.estimatedPowerMw
+//        )
+//
+//        _sensorChartData.update { currentCharts ->
+//            val chartExists = currentCharts.any { it.sensorType == newData.type }
+//
+//            if (chartExists) {
+//                currentCharts.map { chart ->
+//                    if (chart.sensorType == newData.type) {
+//                        // Añadimos el punto y limitamos el histórico (últimos 20 puntos)
+//                        val updatedPoints = (chart.points + newPoint).takeLast(20)
+//
+//                        chart.copy(
+//                            points = updatedPoints
+//                        )
+//                    } else {
+//                        chart
+//                    }
+//                }
+//            } else {
+//                // Primer punto para este sensor
+//                currentCharts + SensorChartData(
+//                    sensorType = newData.type,
+//                    displayName = newData.displayName,
+//                    points = listOf(newPoint)
+//                )
+//            }
+//        }
+//    }
+
+    private fun updateChartData(sensors: List<SensorData>) {
+
+        val elapsedSeconds = (System.currentTimeMillis() - startTime) / 1000f
 
         _sensorChartData.update { currentCharts ->
-            val chartExists = currentCharts.any { it.sensorType == newData.type }
 
-            if (chartExists) {
-                currentCharts.map { chart ->
-                    if (chart.sensorType == newData.type) {
-                        // Añadimos el punto y limitamos el histórico (últimos 20 puntos)
-                        val updated_points = (chart.points + newPoint).takeLast(20)
+            val updatedCharts = currentCharts.toMutableList()
 
-                        chart.copy(
-                            points = updated_points
-                        )
-                    } else {
-                        chart
-                    }
-                }
-            } else {
-                // Primer punto para este sensor
-                currentCharts + SensorChartData(
-                    sensorType = newData.type,
-                    displayName = newData.displayName,
-                    points = listOf(newPoint)
+            sensors.forEach { sensor ->
+
+                val newPoint = SensorChartPoint(
+                    timeStamp = elapsedSeconds,
+                    powerMw = sensor.estimatedPowerMw
                 )
+
+                val index = updatedCharts.indexOfFirst { it.sensorType == sensor.type }
+
+                if (index >= 0) {
+                    val chart = updatedCharts[index]
+
+                    val updatedPoints =
+                        (chart.points + newPoint).takeLast(30)
+
+                    updatedCharts[index] = chart.copy(points = updatedPoints)
+
+                } else {
+                    updatedCharts.add(
+                        SensorChartData(
+                            sensorType = sensor.type,
+                            displayName = sensor.displayName,
+                            points = listOf(newPoint)
+                        )
+                    )
+                }
             }
+
+            updatedCharts
         }
     }
 }
