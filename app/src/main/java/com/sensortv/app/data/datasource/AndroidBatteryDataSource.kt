@@ -11,8 +11,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 
 /**
- * Implementación concreta de [BatteryDataSource] que interactúa directamente con el hardware de Android.
- * Esta clase implementa [BroadcastReceiver] para recibir actualizaciones del nivel de batería.
+ * Implementación concreta de [BatteryDataSource] que monitorea el estado de la batería mediante el sistema Android.
+ * Esta clase implementa [BroadcastReceiver] para escuchar cambios en el sistema mediante el Intent
  *
  * @param context Contexto de la aplicación necesario para acceder al servicio de batería.
  */
@@ -20,6 +20,12 @@ class AndroidBatteryDataSource(
     private val context: Context
 ) : BatteryDataSource {
 
+    /**
+     * Observa los cambios en el nivel y voltaje de la batería en tiempo real.
+     *
+     * @return Un [Flow] que emite [BatteryData] cada vez que el sistema notifica un cambio
+     * en el estado de energía.
+     */
     override fun observeBattery(): Flow<BatteryData> = callbackFlow {
 
         val receiver = object : BroadcastReceiver() {

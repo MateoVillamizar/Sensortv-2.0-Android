@@ -28,17 +28,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.sensortv.app.model.SensorInfo
 import com.sensortv.app.presentation.viewmodel.SensorViewModel
-import com.sensortv.app.presentation.viewmodel.SensorViewModelFactory
 import com.sensortv.app.ui.components.AppButton
 import com.sensortv.app.ui.components.StandardTopBar
 import com.sensortv.app.ui.navigation.AppRoutes
@@ -83,7 +80,7 @@ fun MainMenuScreen(
                 SensorInfo(
                     sensorType = data.displayName,
                     isAvailable = data.available,
-                    sensorPower = data.estimatedConsumption
+                    sensorPower = data.nominalConsumptionmA
                 )
             }
 

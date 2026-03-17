@@ -3,7 +3,9 @@ package com.sensortv.app.presentation.viewmodel
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.sensortv.app.data.datasource.AndroidBatteryDataSource
 import com.sensortv.app.data.datasource.AndroidSensorDataSource
+import com.sensortv.app.data.repository.BatteryRepositoryImpl
 import com.sensortv.app.data.repository.SensorRepository
 import com.sensortv.app.data.repository.SensorRepositoryImpl
 
@@ -24,10 +26,13 @@ class SensorViewModelFactory(
         if (modelClass.isAssignableFrom(SensorViewModel::class.java)) {
 
             // Construcción manual de dependencias
-            val dataSource = AndroidSensorDataSource(context)
-            val repository = SensorRepositoryImpl(dataSource)
+            val sensorDataSource = AndroidSensorDataSource(context)
+            val batteryDataSource = AndroidBatteryDataSource(context)
 
-            return SensorViewModel(repository) as T
+            val sensorRepo = SensorRepositoryImpl(sensorDataSource, batteryDataSource)
+            val batteryRepo = BatteryRepositoryImpl(batteryDataSource)
+
+            return SensorViewModel(sensorRepo, batteryRepo) as T
         }
         throw IllegalArgumentException("Clase ViewModel desconocida")
     }

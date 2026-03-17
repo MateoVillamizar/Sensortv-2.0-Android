@@ -108,7 +108,7 @@ class AndroidSensorDataSource(
             values = event.values.toList(),
             frequencyHz = frequency,
             available = true,
-            estimatedConsumption = event.sensor.power
+            nominalConsumptionmA = event.sensor.power
         )
 
         emitter(data)

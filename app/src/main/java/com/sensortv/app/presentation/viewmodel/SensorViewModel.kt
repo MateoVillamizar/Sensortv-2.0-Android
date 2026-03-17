@@ -3,7 +3,9 @@ package com.sensortv.app.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.sensortv.app.data.repository.BatteryRepository
 import com.sensortv.app.data.repository.SensorRepository
+import com.sensortv.app.model.BatteryData
 import com.sensortv.app.model.SensorData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,14 +19,19 @@ import kotlinx.coroutines.launch
  * @property repository Repositorio que provee acceso a la fuente de datos de los sensores.
  */
 class SensorViewModel(
-    private val repository: SensorRepository
+    private val sensorRepository: SensorRepository,
+    private val batteryRepository: BatteryRepository
 ): ViewModel() {
 
     private val _sensorList = MutableStateFlow<List<SensorData>>(emptyList())
     val sensorList: StateFlow<List<SensorData>> = _sensorList
 
+    private val _batteryState = MutableStateFlow<BatteryData?>(null)
+    val batteryState: StateFlow<BatteryData?> = _batteryState
+
     init {
         observeSensors()
+        observeBattery()
     }
 
     /**
@@ -34,7 +41,7 @@ class SensorViewModel(
      */
     private fun observeSensors() {
         viewModelScope.launch {
-            repository.observeSensors().collect { newData ->
+            sensorRepository.observeSensors().collect { newData ->
                 val currentList = _sensorList.value
 
                 // Verificar si el sensor ya existe en la lista actual
@@ -55,6 +62,14 @@ class SensorViewModel(
                     // Si no existe, se añade a la lista actual
                     currentList + newData
                 }
+            }
+        }
+    }
+
+    private fun observeBattery() {
+        viewModelScope.launch {
+            batteryRepository.observeBattery().collect { batteryData ->
+                _batteryState.value = batteryData
             }
         }
     }
