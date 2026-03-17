@@ -1,14 +1,18 @@
 package com.sensortv.app.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.sensortv.app.data.repository.BatteryRepository
 import com.sensortv.app.data.repository.SensorRepository
 import com.sensortv.app.model.BatteryData
+import com.sensortv.app.model.SensorChartData
+import com.sensortv.app.model.SensorChartPoint
 import com.sensortv.app.model.SensorData
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.sample
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
@@ -16,7 +20,8 @@ import kotlinx.coroutines.launch
  * Transforma el flujo de datos crudos del repositorio en una lista de estado único
  * que la interfaz de usuario puede observar fácilmente.
  *
- * @property repository Repositorio que provee acceso a la fuente de datos de los sensores.
+ * @property  sensorRepository Repositorio que proporciona el flujo de datos crudos.
+ * @property  batteryRepository Repositorio que proporciona el flujo de datos de la batería.
  */
 class SensorViewModel(
     private val sensorRepository: SensorRepository,
@@ -29,6 +34,11 @@ class SensorViewModel(
     private val _batteryState = MutableStateFlow<BatteryData?>(null)
     val batteryState: StateFlow<BatteryData?> = _batteryState
 
+    // Datos en el tiempo
+    private val _sensorChartData = MutableStateFlow<List<SensorChartData>>(emptyList())
+    val sensorChartData: StateFlow<List<SensorChartData>> = _sensorChartData
+    private var lastChartUpdate: Long = 0
+
     init {
         observeSensors()
         observeBattery()
@@ -39,28 +49,17 @@ class SensorViewModel(
      * La lógica actualiza un sensor existente en la lista si coincide el tipo,
      * o agrega el nuevo sensor si la lista está vacía o no lo contiene.
      */
+    @OptIn(FlowPreview::class)
     private fun observeSensors() {
         viewModelScope.launch {
             sensorRepository.observeSensors().collect { newData ->
-                val currentList = _sensorList.value
+                updateSensorList(newData)
 
-                // Verificar si el sensor ya existe en la lista actual
-                val sensorExists = currentList.any { it.type == newData.type }
-
-                _sensorList.value = if (sensorExists) {
-                    // Si existe, se usa map para encontrarlo y actualizar sus valores
-                    currentList.map { sensor ->
-                        if (sensor.type == newData.type) {
-                            sensor.copy(
-                                values = newData.values,
-                                frequencyHz = newData.frequencyHz,
-                                available = true
-                            )
-                        } else sensor
-                    }
-                } else {
-                    // Si no existe, se añade a la lista actual
-                    currentList + newData
+                // Solo se ejecuta si han pasado x milisegundos desde la última actualización
+                val currentTime = System.currentTimeMillis()
+                if (currentTime - lastChartUpdate >= 3000) {
+                    updateChartData(newData)
+                    lastChartUpdate = currentTime
                 }
             }
         }
@@ -70,6 +69,65 @@ class SensorViewModel(
         viewModelScope.launch {
             batteryRepository.observeBattery().collect { batteryData ->
                 _batteryState.value = batteryData
+            }
+        }
+    }
+
+    private fun updateSensorList(newData: SensorData) {
+        // Se toma el estado actual de la lista de forma segura
+        _sensorList.update { currentList ->
+
+            // Verificar si el sensor ya existe en la lista actual
+            val sensorExists = currentList.any { it.type == newData.type }
+
+            if (sensorExists) {
+                //  Si existe, recorremos la lista y reemplazamos solo el sensor que cambió
+                currentList.map { sensor ->
+                    if (sensor.type == newData.type) {
+                        sensor.copy(
+                            values = newData.values,
+                            frequencyHz = newData.frequencyHz,
+                            available = true
+                        )
+                    } else sensor // Los demás sensores no cambian
+                }
+            } else {
+                // Si es nuevo, se agrega al final de la lista
+                currentList + newData
+            }
+        }
+    }
+
+    private fun updateChartData(newData: SensorData) {
+        val currentTime = System.currentTimeMillis()
+        val newPoint = SensorChartPoint(
+            timeStamp = currentTime,
+            powerMw = newData.nominalConsumptionmA
+        )
+
+        _sensorChartData.update { currentCharts ->
+            val chartExists = currentCharts.any { it.sensorType == newData.type }
+
+            if (chartExists) {
+                currentCharts.map { chart ->
+                    if (chart.sensorType == newData.type) {
+                        // Añadimos el punto y limitamos el histórico (últimos 20 puntos)
+                        val updated_points = (chart.points + newPoint).takeLast(20)
+
+                        chart.copy(
+                            points = updated_points
+                        )
+                    } else {
+                        chart
+                    }
+                }
+            } else {
+                // Primer punto para este sensor
+                currentCharts + SensorChartData(
+                    sensorType = newData.type,
+                    displayName = newData.displayName,
+                    points = listOf(newPoint)
+                )
             }
         }
     }
