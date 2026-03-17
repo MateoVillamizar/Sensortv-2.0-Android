@@ -24,27 +24,40 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.sensortv.app.model.SensorInfo
+import com.sensortv.app.presentation.viewmodel.SensorViewModel
+import com.sensortv.app.presentation.viewmodel.SensorViewModelFactory
 import com.sensortv.app.ui.components.AppButton
 import com.sensortv.app.ui.components.StandardTopBar
 import com.sensortv.app.ui.navigation.AppRoutes
 
 /**
- * Pantalla principal que muestra el estado de la batería y los sensores detectados en el dispositivo.
+ * Pantalla principal de SensorTV 2.0
+ * Gestiona la presentación del estado de la batería y la lista reactiva de sensores detectados.
  *
- * @param navController Controlador de navegación para manejar la navegación entre pantallas.
+ * @param navController Gestor de navegación para redirigir a monitoreo o historial
+ * @param viewModel Instancia de [SensorViewModel] que provee el flujo de datos de sensores.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainMenuScreen(navController: NavHostController) {
+fun MainMenuScreen(
+    viewModel: SensorViewModel,
+    navController: NavHostController
+) {
+    val realSensors by viewModel.sensorList.collectAsStateWithLifecycle()
+
     Scaffold(
         topBar = { StandardTopBar("SensorTV 2.0") }
     ) { innerPadding ->
@@ -65,16 +78,16 @@ fun MainMenuScreen(navController: NavHostController) {
                 batteryVoltage = 4.314
             )
 
-            // Lista de sensores del sistema (simulada)
-            val sensors = listOf(
-                SensorInfo("Acelerómetro", true, 2.3f),
-                SensorInfo("Giroscopio", true, 1.5f),
-                SensorInfo("Proximidad", true, 0.5f),
-                SensorInfo("Luminosidad", true, 3.0f),
-                SensorInfo("Magnetómetro", false, 0.0f)
-            )
+            // Lista de sensores del sistema
+            val sensorInfoList = realSensors.map { data ->
+                SensorInfo(
+                    sensorType = data.displayName,
+                    isAvailable = data.available,
+                    sensorPower = data.estimatedConsumption
+                )
+            }
 
-            SensorTableCard(sensors)
+            SensorTableCard(sensorInfoList)
 
             AppButton(
                 text = "Monitorear Sensores",
@@ -237,12 +250,12 @@ private fun SensorRow(sensor: SensorInfo) {
 }
 
 /**
- * Componente Box que define una celda de la tabla de sensores.
+ * Componente Box que define y renderiza una celda individual dentro de la tabla de sensores.
  *
- * @param text Texto a mostrar en la celda.
- * @param weight Peso de la celda en la distribución horizontal.
- * @param isHeader Indica si la celda es la cabecera (header).
- * @param textColor Color del texto (opcional).
+ * @param text Contenido textual de la celda.
+ * @param weight Proporción de ancho en la fila (basado en [RowScope.weight]).
+ * @param isHeader Si es verdadero, aplica estilo resaltado de cabecera.
+ * @param textColor Color específico para el texto; si es nulo, usa el esquema por defecto.
  */
 @Composable
 private fun RowScope.TableCell(
@@ -275,11 +288,13 @@ private fun RowScope.TableCell(
     }
 }
 
-
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun MenuScreenPreview() {
     // Un NavHostController simulado para el preview
     val dummyNavController = rememberNavController()
-    MainMenuScreen(navController = dummyNavController)
+    MainMenuScreen(
+        navController = dummyNavController,
+        viewModel = TODO()
+    )
 }
