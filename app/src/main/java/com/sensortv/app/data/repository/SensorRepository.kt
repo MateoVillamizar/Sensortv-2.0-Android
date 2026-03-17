@@ -1,4 +1,11 @@
 package com.sensortv.app.data.repository
 
-class SensorRepository {
+import com.sensortv.app.model.SensorData
+import kotlinx.coroutines.flow.Flow
+
+/**
+ * Interfaz que define el puente entre datos crudos (DataSource) y lo que usará el ViewModel
+ */
+interface SensorRepository {
+    fun observeSensors(): Flow<SensorData>
 }
