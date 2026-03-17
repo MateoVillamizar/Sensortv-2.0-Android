@@ -43,7 +43,10 @@ fun AppNavHost(navController: NavHostController) {
         }
 
         composable(AppRoutes.Monitoring.route) {
-            MonitoringScreen(navController = navController)
+            MonitoringScreen(
+                viewModel = viewModel,
+                navController = navController
+            )
         }
 
         composable(AppRoutes.Capture.route) {

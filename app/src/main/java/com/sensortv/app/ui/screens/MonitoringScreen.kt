@@ -33,9 +33,11 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.sensortv.app.model.SensorMonitorInfo
+import com.sensortv.app.presentation.viewmodel.SensorViewModel
 import com.sensortv.app.ui.components.AppButton
 import com.sensortv.app.ui.components.StandardTopBar
 import com.sensortv.app.ui.components.getSensorIcon
@@ -48,7 +50,14 @@ import com.sensortv.app.ui.navigation.AppRoutes
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MonitoringScreen(navController: NavHostController) {
+fun MonitoringScreen(
+    viewModel: SensorViewModel,
+    navController: NavHostController
+) {
+
+    val realSensors by viewModel.sensorList.collectAsStateWithLifecycle()
+    val batteryInfo by viewModel.batteryState.collectAsStateWithLifecycle()
+
     Scaffold(
         topBar = { StandardTopBar("Monitoreo de Sensores") }
     ) { innerPadding ->
@@ -62,17 +71,20 @@ fun MonitoringScreen(navController: NavHostController) {
             horizontalAlignment = Alignment.CenterHorizontally
         ){
             // Lista de sensores en monitoreo (simulada)
-            val sensors = listOf(
-                SensorMonitorInfo("Acelerómetro", "Bosch BMA400", 0.2f, 12.3f),
-                SensorMonitorInfo("Giroscopio", "Invensense MPU6500", 0.3f, 8.4f),
-                SensorMonitorInfo("Proximidad", "Liteon LTR553", 0.1f, 2.1f)
-            )
+            val sensorsMonitoringList = realSensors.map { sensor ->
+                SensorMonitorInfo(
+                    SensorName = sensor.displayName,
+                    hardware = sensor.hardwareName,
+                    baseCurrentMa = sensor.nominalConsumptionmA,
+                    currentPowerMw = sensor.estimatedPowerMw
+                )
+            }
 
             item {
                 GeneralInfoCard(
-                    batteryPercent = 84,
-                    batteryVoltage = 4.1,
-                    sensorsAvailable = sensors.size,
+                    batteryPercent = batteryInfo?.percentage ?: 0,
+                    batteryVoltage = batteryInfo?.voltage ?: 0f,
+                    sensorsAvailable = sensorsMonitoringList.size,
                     averagePower = 23.7f
                 )
             }
@@ -88,7 +100,7 @@ fun MonitoringScreen(navController: NavHostController) {
                     color = MaterialTheme.colorScheme.primary
                 )
             }
-            items(sensors) { sensor ->
+            items(sensorsMonitoringList) { sensor ->
                 SensorExpandableInfoCard(sensor)
             }
 
@@ -143,7 +155,7 @@ private fun PowerChartPlaceholder() {
 @Composable
 private fun GeneralInfoCard(
     batteryPercent: Int,
-    batteryVoltage: Double,
+    batteryVoltage: Float,
     sensorsAvailable: Int,
     averagePower: Float
 ) {
@@ -176,7 +188,7 @@ private fun GeneralInfoCard(
             Text("Sensores disponibles: $sensorsAvailable",
                 style = MaterialTheme.typography.bodyLarge,
             )
-            Text("Promedio total: $averagePower mW",
+            Text("Promedio total (PENDIENTE): $averagePower mW",
                 style = MaterialTheme.typography.bodyLarge,
             )
         }
@@ -214,13 +226,13 @@ private fun SensorExpandableInfoCard(sensor: SensorMonitorInfo) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Icon(
-                    imageVector = getSensorIcon(sensor.name),
-                    contentDescription = sensor.name,
+                    imageVector = getSensorIcon(sensor.SensorName),
+                    contentDescription = sensor.SensorName,
                     tint = MaterialTheme.colorScheme.primary
                 )
 
                 Text(
-                    text = sensor.name,
+                    text = sensor.SensorName,
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Center,
@@ -289,5 +301,8 @@ fun SensorListSection(sensors: List<SensorMonitorInfo>) {
 @Composable
 fun MonitoringScreenPreview() {
     val dummyNavController = rememberNavController()
-    MonitoringScreen(navController = dummyNavController)
+    MonitoringScreen(
+        navController = dummyNavController,
+        viewModel = TODO()
+    )
 }

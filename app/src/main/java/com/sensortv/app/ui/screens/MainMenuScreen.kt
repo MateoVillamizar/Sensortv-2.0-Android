@@ -54,6 +54,7 @@ fun MainMenuScreen(
     navController: NavHostController
 ) {
     val realSensors by viewModel.sensorList.collectAsStateWithLifecycle()
+    val batteryInfo by viewModel.batteryState.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = { StandardTopBar("SensorTV 2.0") }
@@ -71,16 +72,16 @@ fun MainMenuScreen(
 
             // Información de la batería en tiempo real (simulada)
             BatteryInfoCard(
-                batteryPercentage = 96,
-                batteryVoltage = 4.314
+                batteryPercentage = batteryInfo?.percentage ?: 0,
+                batteryVoltage = batteryInfo?.voltage ?: 0f
             )
 
             // Lista de sensores del sistema
-            val sensorInfoList = realSensors.map { data ->
+            val sensorInfoList = realSensors.map { sensor ->
                 SensorInfo(
-                    sensorType = data.displayName,
-                    isAvailable = data.available,
-                    sensorPower = data.nominalConsumptionmA
+                    sensorType = sensor.displayName,
+                    isAvailable = sensor.available,
+                    sensorPower = sensor.nominalConsumptionmA
                 )
             }
 
@@ -110,8 +111,11 @@ fun MainMenuScreen(
 @Composable
 private fun BatteryInfoCard(
     batteryPercentage: Int,
-    batteryVoltage: Double
+    batteryVoltage: Float
 ) {
+
+    val formattedVoltage = "%.2f V".format(batteryVoltage)
+
     Card(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
@@ -133,7 +137,7 @@ private fun BatteryInfoCard(
                 style = MaterialTheme.typography.bodyLarge
             )
             Text(
-                text = "Voltaje (tiempo real): $batteryVoltage V",
+                text = "Voltaje (tiempo real): $formattedVoltage",
                 style = MaterialTheme.typography.bodyLarge
             )
         }
