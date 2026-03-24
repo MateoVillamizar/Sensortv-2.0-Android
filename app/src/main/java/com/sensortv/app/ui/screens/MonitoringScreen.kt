@@ -1,9 +1,7 @@
 package com.sensortv.app.ui.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -26,25 +24,23 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.sensortv.app.ui.model.SensorMonitorInfo
 import com.sensortv.app.presentation.viewmodel.SensorViewModel
 import com.sensortv.app.ui.components.AppButton
 import com.sensortv.app.ui.components.SensorPowerChart
 import com.sensortv.app.ui.components.StandardTopBar
 import com.sensortv.app.ui.components.getSensorIcon
+import com.sensortv.app.ui.model.SensorMonitorInfo
 import com.sensortv.app.ui.navigation.AppRoutes
 
 /**
@@ -73,7 +69,7 @@ fun MonitoringScreen(
                 .fillMaxSize()
                 .padding(innerPadding),
             contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ){
             // Lista de sensores en monitoreo (simulada)
@@ -94,6 +90,8 @@ fun MonitoringScreen(
                     averagePower = 23.7f
                 )
             }
+
+            item { Spacer(modifier = Modifier.height(8.dp)) }
 
             item { SensorPowerChart(
                 chartDataList = chartData,
@@ -261,7 +259,7 @@ private fun SensorExpandableInfoCard(sensor: SensorMonitorInfo) {
                 )
 
                 Text(
-                    text = "Potencia actual: ${"%.3f".format(sensor.currentPowerMw)} mW",
+                    text = "Potencia actual: ${"%.4f".format(sensor.currentPowerMw)} mW",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
