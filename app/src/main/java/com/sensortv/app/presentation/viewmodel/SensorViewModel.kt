@@ -9,6 +9,8 @@ import com.sensortv.app.ui.model.SensorChartData
 import com.sensortv.app.ui.model.SensorChartPoint
 import com.sensortv.app.data.model.SensorData
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -38,10 +40,19 @@ class SensorViewModel(
     val sensorChartData: StateFlow<List<SensorChartData>> = _sensorChartData
     private var lastChartUpdate: Long = 0
 
-    private val startTime = System.currentTimeMillis()
+    private var startTime: Long = 0
+
+    // Variables de captura de datos
+    private val _isCapturing = MutableStateFlow(false)
+    val isCapturing: StateFlow<Boolean> = _isCapturing
+
+    private val _remainingTime = MutableStateFlow(0)
+    val remainingTime: StateFlow<Int> = _remainingTime
+
+    private var captureJob: Job? = null
 
     init {
-        observeSensors()
+        startMonitoring()
         observeBattery()
     }
 
@@ -51,17 +62,16 @@ class SensorViewModel(
      * o agrega el nuevo sensor si la lista está vacía o no lo contiene.
      */
     @OptIn(FlowPreview::class)
-    private fun observeSensors() {
-        viewModelScope.launch {
-            sensorRepository.observeSensors().collect { newData ->
-                updateSensorList(newData)
+    private suspend fun observeSensors() {
+        sensorRepository.observeSensors().collect { newData ->
+            updateSensorList(newData)
 
-                // Solo se ejecuta si han pasado x milisegundos desde la última actualización
-                val currentTime = System.currentTimeMillis()
-                if (currentTime - lastChartUpdate >= 3000) {
-                    updateChartData(_sensorList.value)
-                    lastChartUpdate = currentTime
-                }
+            // Solo se ejecuta si han pasado x milisegundos desde la última actualización
+            val currentTime = System.currentTimeMillis()
+
+            if (currentTime - lastChartUpdate >= 3000) {
+                updateChartData(_sensorList.value)
+                lastChartUpdate = currentTime
             }
         }
     }
@@ -137,5 +147,94 @@ class SensorViewModel(
             }
             updatedCharts
         }
+    }
+
+    /**
+     * Referencia al proceso de monitoreo de sensores en ejecución.
+     * Permite controlar (iniciar/detener) la recolección de datos.
+     */
+    private var sensorsJob: Job? = null
+
+    /**
+     * Inicia el monitoreo de sensores del dispositivo.
+     *
+     * Esta función comienza la recolección de datos desde el [SensorRepository]
+     * utilizando corrutinas dentro del [viewModelScope].
+     *
+     * - Evita iniciar múltiples procesos simultáneos verificando si ya existe uno activo.
+     * - Actualiza la lista de sensores en tiempo real.
+     * - Actualiza los datos de la gráfica cada cierto intervalo de tiempo.
+     */
+    fun startMonitoring() {
+
+        if (sensorsJob != null) return
+
+        startTime = System.currentTimeMillis()
+
+        sensorsJob = viewModelScope.launch {
+            observeSensors()
+        }
+    }
+
+    /**
+     * Detiene el monitoreo de sensores si está en ejecución.
+     *
+     * Cancela la corrutina activa asociada al monitoreo, provocando que:
+     * - Se deje de recolectar datos
+     * - Se liberen los recursos asociados (sensores)
+     */
+    fun stopMonitoring() {
+        startTime = 0
+        sensorsJob?.cancel()
+        sensorsJob = null
+    }
+
+    /**
+     * Reinicia completamente el monitoreo de sensores.
+     *
+     * - Detiene el monitoreo actual si existe
+     * - Limpia los datos previos
+     * - Reinicia el tiempo
+     * - Inicia nuevamente la recolección
+     */
+    fun restartMonitoring() {
+
+        stopMonitoring()
+
+        //Reiniciar estado
+        _sensorList.value = emptyList()
+        _sensorChartData.value = emptyList()
+        lastChartUpdate = 0
+        startTime = System.currentTimeMillis()
+
+        sensorsJob = viewModelScope.launch {
+            observeSensors()
+        }
+    }
+
+    fun startCapture(durationMinutes: Int) {
+        // Reinicia el monitoreo
+        restartMonitoring()
+
+        val totalSeconds = durationMinutes * 60
+        _remainingTime.value = totalSeconds
+        _isCapturing.value = true
+
+        captureJob?.cancel()
+
+        captureJob = viewModelScope.launch {
+
+            while (_remainingTime.value > 0) {
+                delay(1000)
+                _remainingTime.value -= 1
+            }
+
+            _isCapturing.value = false
+        }
+    }
+
+    fun stopCapture() {
+        captureJob?.cancel()
+        _isCapturing.value = false
     }
 }

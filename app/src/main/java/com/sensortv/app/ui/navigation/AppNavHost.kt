@@ -50,7 +50,10 @@ fun AppNavHost(navController: NavHostController) {
         }
 
         composable(AppRoutes.Capture.route) {
-            CaptureScreen(navController = navController)
+            CaptureScreen(
+                viewModel = viewModel,
+                navController = navController)
+
         }
 
         composable(AppRoutes.History.route) {

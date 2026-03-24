@@ -25,6 +25,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,7 +44,7 @@ import com.sensortv.app.ui.components.StandardTopBar
 import com.sensortv.app.ui.navigation.AppRoutes
 
 /**
- * Pantalla principal de SensorTV 2.0
+ * Pantalla del menú principal de SensorTV 2.0
  * Gestiona la presentación del estado de la batería y la lista reactiva de sensores detectados.
  *
  * @param navController Gestor de navegación para redirigir a monitoreo o historial
@@ -55,6 +58,8 @@ fun MainMenuScreen(
 ) {
     val realSensors by viewModel.sensorList.collectAsStateWithLifecycle()
     val batteryInfo by viewModel.batteryState.collectAsStateWithLifecycle()
+
+    var firstTimeMonitoring by rememberSaveable { mutableStateOf(true) }
 
     Scaffold(
         topBar = { StandardTopBar("SensorTV 2.0") }
@@ -89,7 +94,14 @@ fun MainMenuScreen(
 
             AppButton(
                 text = "Monitorear Sensores",
-                onClick = { navController.navigate(AppRoutes.Monitoring.route) },
+                onClick = {
+                    if (firstTimeMonitoring) {
+                        viewModel.restartMonitoring()
+                        firstTimeMonitoring = false
+                    }
+
+                    navController.navigate(AppRoutes.Monitoring.route)
+                },
                 isPrimary = true
             )
 
@@ -114,7 +126,7 @@ private fun BatteryInfoCard(
     batteryVoltage: Float
 ) {
 
-    val formattedVoltage = "%.2f V".format(batteryVoltage)
+    val formattedVoltage = "%.3f V".format(batteryVoltage)
 
     Card(
         colors = CardDefaults.cardColors(

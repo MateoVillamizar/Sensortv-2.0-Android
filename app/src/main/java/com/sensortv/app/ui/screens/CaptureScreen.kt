@@ -1,5 +1,7 @@
 package com.sensortv.app.ui.screens
 
+import android.R.attr.duration
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -17,6 +19,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -24,15 +27,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
+import com.sensortv.app.presentation.viewmodel.SensorViewModel
 import com.sensortv.app.ui.components.AppButton
 import com.sensortv.app.ui.components.SamplingFrequencySelector
 import com.sensortv.app.ui.components.StandardTopBar
 import com.sensortv.app.ui.navigation.AppRoutes
+import kotlinx.coroutines.delay
 
 /**
  * Pantalla para configurar y controlar la captura de datos de sensores.
@@ -42,12 +47,20 @@ import com.sensortv.app.ui.navigation.AppRoutes
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CaptureScreen(navController: NavHostController) {
+fun CaptureScreen(
+    viewModel: SensorViewModel,
+    navController: NavHostController
+) {
 
     // Estado simulado de captura
     var duration by remember { mutableStateOf("") }
-    var isCapturing by remember { mutableStateOf(false) }
     var samplingFrequency by remember { mutableIntStateOf(3) }
+
+    val isValidDuration = duration.isNotEmpty() && duration.toIntOrNull() != null && duration.toInt() > 0
+    val context = LocalContext.current
+
+    val isCapturing by viewModel.isCapturing.collectAsStateWithLifecycle()
+    val remainingTime by viewModel.remainingTime.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = { StandardTopBar("Captura de Datos") }
@@ -81,7 +94,25 @@ fun CaptureScreen(navController: NavHostController) {
             CaptureStatusCard()
             CaptureControls(
                 isCapturing = isCapturing,
-                onToggleCapture = { isCapturing = !isCapturing },
+                onToggleCapture = {
+                    if (!isCapturing) {
+
+                        if(!isValidDuration) {
+                            Toast.makeText(context, "Duración no válida", Toast.LENGTH_SHORT).show()
+                            return@CaptureControls
+                        }
+
+                        // Inicia captura
+                        viewModel.startCapture(duration.toInt())
+
+                    } else {
+                        // Detiene captura
+                        viewModel.stopCapture()
+                        Toast.makeText(context, "Captura detenida", Toast.LENGTH_SHORT).show()
+                    }
+                },
+                isValidDuration = isValidDuration,
+                remainingTime = remainingTime,
                 onNavigateToHistory = { navController.navigate(AppRoutes.History.route) }
             )
 
@@ -189,9 +220,17 @@ fun CaptureStatusCard() {
 @Composable
 fun CaptureControls(
     isCapturing: Boolean,
+    remainingTime: Int,
+    isValidDuration: Boolean,
     onToggleCapture: () -> Unit,
     onNavigateToHistory: () -> Unit,
 ) {
+
+    val minutes = remainingTime / 60
+    val seconds = remainingTime % 60
+
+    val formattedTime = "%02d:%02d".format(minutes, seconds)
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -200,10 +239,7 @@ fun CaptureControls(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = if (isCapturing)
-                "Tiempo restante: 04:59"
-            else
-                "Tiempo restante: 00:00",
+            text = if (isCapturing) "Tiempo restante: $formattedTime" else "Tiempo restante: 00:00",
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface,
         )
@@ -212,6 +248,7 @@ fun CaptureControls(
             text = if (isCapturing) "Detener Captura" else "Iniciar Captura",
             onClick = onToggleCapture,
             isPrimary = !isCapturing,
+            enabled = isCapturing || isValidDuration
         )
 
         AppButton(
@@ -220,11 +257,8 @@ fun CaptureControls(
             isPrimary = true,
         )
     }
-}
 
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun CaptureScreenPreview() {
-    val dummyNavController = rememberNavController()
-    CaptureScreen(navController = dummyNavController)
+    if (remainingTime == 1) {
+        Toast.makeText(LocalContext.current, "Captura finalizada", Toast.LENGTH_SHORT).show()
+    }
 }

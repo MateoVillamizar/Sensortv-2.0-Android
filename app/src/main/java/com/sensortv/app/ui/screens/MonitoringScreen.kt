@@ -126,7 +126,7 @@ fun MonitoringScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 AppButton(
                     text = "Volver",
-                    onClick = { navController.navigate(AppRoutes.Menu.route) },
+                    onClick = { navController.popBackStack() },
                     isPrimary = false
                 )
             }
@@ -150,7 +150,7 @@ private fun GeneralInfoCard(
     averagePower: Float
 ) {
 
-    val formattedVoltage = "%.2f V".format(batteryVoltage)
+    val formattedVoltage = "%.3f V".format(batteryVoltage)
 
     Card(
         colors = CardDefaults.cardColors(
