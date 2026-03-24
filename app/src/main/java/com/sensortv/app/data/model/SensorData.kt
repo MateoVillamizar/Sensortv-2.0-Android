@@ -1,4 +1,4 @@
-package com.sensortv.app.model
+package com.sensortv.app.data.model
 
 /**
  * Modela los datos asociados a un sensor.

@@ -2,7 +2,7 @@ package com.sensortv.app.data.repository
 
 import com.sensortv.app.data.datasource.BatteryDataSource
 import com.sensortv.app.data.datasource.SensorDataSource
-import com.sensortv.app.model.SensorData
+import com.sensortv.app.data.model.SensorData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 
@@ -39,6 +39,7 @@ class SensorRepositoryImpl(
         }
     }
 
+    // NECESARIO reestructurar esta operación para no mezclar responsabilidad de repositorios
     /**
      * Calcula la potencia consumida por el sensor en miliwatts.
      * @param currentMa La corriente nominal reportada por el sensor (mA).

@@ -4,10 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sensortv.app.data.repository.BatteryRepository
 import com.sensortv.app.data.repository.SensorRepository
-import com.sensortv.app.model.BatteryData
-import com.sensortv.app.model.SensorChartData
-import com.sensortv.app.model.SensorChartPoint
-import com.sensortv.app.model.SensorData
+import com.sensortv.app.data.model.BatteryData
+import com.sensortv.app.ui.model.SensorChartData
+import com.sensortv.app.ui.model.SensorChartPoint
+import com.sensortv.app.data.model.SensorData
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -100,42 +100,6 @@ class SensorViewModel(
         }
     }
 
-//    private fun updateChartData(newData: SensorData) {
-//        // Convertimos el tiempo actual en "segundos desde que inició la app"
-//        val elapsedSeconds = (System.currentTimeMillis() - startTime) / 1000f
-//
-//        val newPoint = SensorChartPoint(
-//            timeStamp = elapsedSeconds,
-//            powerMw = newData.estimatedPowerMw
-//        )
-//
-//        _sensorChartData.update { currentCharts ->
-//            val chartExists = currentCharts.any { it.sensorType == newData.type }
-//
-//            if (chartExists) {
-//                currentCharts.map { chart ->
-//                    if (chart.sensorType == newData.type) {
-//                        // Añadimos el punto y limitamos el histórico (últimos 20 puntos)
-//                        val updatedPoints = (chart.points + newPoint).takeLast(20)
-//
-//                        chart.copy(
-//                            points = updatedPoints
-//                        )
-//                    } else {
-//                        chart
-//                    }
-//                }
-//            } else {
-//                // Primer punto para este sensor
-//                currentCharts + SensorChartData(
-//                    sensorType = newData.type,
-//                    displayName = newData.displayName,
-//                    points = listOf(newPoint)
-//                )
-//            }
-//        }
-//    }
-
     private fun updateChartData(sensors: List<SensorData>) {
 
         val elapsedSeconds = (System.currentTimeMillis() - startTime) / 1000f
@@ -171,7 +135,6 @@ class SensorViewModel(
                     )
                 }
             }
-
             updatedCharts
         }
     }

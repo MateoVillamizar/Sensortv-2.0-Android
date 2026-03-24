@@ -1,4 +1,4 @@
-package com.sensortv.app.model
+package com.sensortv.app.data.model
 
 /**
  * Representa los resultados obtenidos de la medición de un sensor.

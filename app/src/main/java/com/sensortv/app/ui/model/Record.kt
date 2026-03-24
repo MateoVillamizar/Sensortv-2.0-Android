@@ -1,4 +1,4 @@
-package com.sensortv.app.model
+package com.sensortv.app.ui.model
 
 // Representa un registro guardado de captura (Cambiar o Verificar)
 data class Record(

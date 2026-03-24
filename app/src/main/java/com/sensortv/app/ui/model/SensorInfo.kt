@@ -1,4 +1,4 @@
-package com.sensortv.app.model
+package com.sensortv.app.ui.model
 
 /**
  * Representa la información básica al detectar un sensor.

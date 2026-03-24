@@ -1,4 +1,4 @@
-package com.sensortv.app.model
+package com.sensortv.app.ui.model
 
 /**
  * Modelo de datos para representar un sensor en el gráfico lineal de tiempo y potencia.

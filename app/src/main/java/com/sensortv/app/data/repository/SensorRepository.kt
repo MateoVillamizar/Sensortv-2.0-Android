@@ -1,6 +1,6 @@
 package com.sensortv.app.data.repository
 
-import com.sensortv.app.model.SensorData
+import com.sensortv.app.data.model.SensorData
 import kotlinx.coroutines.flow.Flow
 
 /**

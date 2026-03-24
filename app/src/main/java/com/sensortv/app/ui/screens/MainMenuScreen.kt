@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.sensortv.app.model.SensorInfo
+import com.sensortv.app.ui.model.SensorInfo
 import com.sensortv.app.presentation.viewmodel.SensorViewModel
 import com.sensortv.app.ui.components.AppButton
 import com.sensortv.app.ui.components.StandardTopBar

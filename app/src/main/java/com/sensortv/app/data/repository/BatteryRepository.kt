@@ -1,6 +1,6 @@
 package com.sensortv.app.data.repository
 
-import com.sensortv.app.model.BatteryData
+import com.sensortv.app.data.model.BatteryData
 import kotlinx.coroutines.flow.Flow
 
 /**
