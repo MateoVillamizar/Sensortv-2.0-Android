@@ -37,7 +37,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.sensortv.app.presentation.viewmodel.SensorViewModel
 import com.sensortv.app.ui.components.AppButton
-import com.sensortv.app.ui.components.SensorPowerChart
+import com.sensortv.app.ui.components.Chart.SensorPowerChart
 import com.sensortv.app.ui.components.StandardTopBar
 import com.sensortv.app.ui.components.getSensorIcon
 import com.sensortv.app.ui.model.SensorMonitorInfo

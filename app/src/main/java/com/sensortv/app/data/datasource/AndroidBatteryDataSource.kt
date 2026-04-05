@@ -31,9 +31,9 @@ class AndroidBatteryDataSource(
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(ctx: Context?, intent: Intent?) {
 
-                val level = intent?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1
-                val scale = intent?.getIntExtra(BatteryManager.EXTRA_SCALE, -1) ?: -1
-                val voltage = intent?.getIntExtra(BatteryManager.EXTRA_VOLTAGE, -1) ?: -1
+                val level = intent?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1 // Valor actual
+                val scale = intent?.getIntExtra(BatteryManager.EXTRA_SCALE, -1) ?: -1 // Valor máximo posible
+                val voltage = intent?.getIntExtra(BatteryManager.EXTRA_VOLTAGE, -1) ?: -1 //Valor en milivoltios
 
                 val percentage = (level * 100) / scale
                 val voltageVolts = voltage / 1000f

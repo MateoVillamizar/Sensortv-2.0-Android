@@ -2,6 +2,7 @@ package com.sensortv.app.ui.components
 
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.RotateRight
 import androidx.compose.material.icons.filled.*
 
 /**
@@ -13,7 +14,7 @@ import androidx.compose.material.icons.filled.*
 fun getSensorIcon(sensorName: String): ImageVector {
     return when (sensorName) {
         "Acelerómetro" -> Icons.Default.Sensors
-        "Giroscopio" -> Icons.Default.RotateRight
+        "Giroscopio" -> Icons.AutoMirrored.Filled.RotateRight
         "Proximidad" -> Icons.Default.Visibility
         "Luminosidad" -> Icons.Default.LightMode
         "Magnetómetro" -> Icons.Default.Explore
