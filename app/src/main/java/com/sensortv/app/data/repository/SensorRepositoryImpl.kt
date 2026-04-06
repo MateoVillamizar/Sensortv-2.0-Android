@@ -7,9 +7,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 
 /**
- * Implementación concreta de [SensorRepository] que interactúa con [SensorDataSource].
+ * Implementación concreta de [SensorRepository] que coordina múltiples fuentes de datos
+ * para calcular el consumo.
  *
- * @param dataSource Fuente para obtener los datos de sensores.
+ * @param sensorDataSource Origen de las lecturas de hardware (Corriente nominal).
+ * @param batteryDataSource Origen del estado eléctrico del dispositivo (Voltaje).
  */
 class SensorRepositoryImpl(
     private val sensorDataSource: SensorDataSource,
@@ -17,9 +19,12 @@ class SensorRepositoryImpl(
 ) : SensorRepository {
 
     /**
-     * Observa el flujo de datos de los sensores y enriquece cada emisión con
-     * cálculos de consumo basados en el estado actual de la batería.
-     * @return Un [Flow] de [SensorData] actualizado.
+     * Combina las lecturas de los sensores con el voltaje de la batería en tiempo real.
+     * * El uso de [combine] permite que la potencia estimada (P = V * I) se actualice
+     * instantáneamente si cambia cualquiera de los dos factores.
+     *
+     * @return [Flow] reactivo que emite [SensorData] actualizado con la potencia estimada calculada
+     * cada vez que cambian los datos de los sensores o el voltaje de la batería.
      */
     override fun observeSensors(): Flow<SensorData> {
         return combine(
@@ -27,21 +32,23 @@ class SensorRepositoryImpl(
             batteryDataSource.observeBattery()
         ) { sensorData, batteryData ->
 
-            // P = V * I -> Voltaje (V) * Corriente (mA) = Potencia (mW)
-            val powermW = calculatePower(
+            // Cálculo de potencia: P = V * I -> Voltios (V) * Miliamperios (mA) = Miliwatts (mW)
+            val estimatedPowermW = calculatePower(
                 currentMa = sensorData.nominalConsumptionmA,
                 batteryVoltage = batteryData.voltage
             )
 
+            // Retornar una copia del modelo con el nuevo valor calculado
             sensorData.copy(
-                estimatedPowerMw = powermW
+                estimatedPowerMw = estimatedPowermW
             )
         }
     }
 
     // NECESARIO reestructurar esta operación para no mezclar responsabilidad de repositorios
     /**
-     * Calcula la potencia consumida por el sensor en miliwatts.
+     * Realiza una estimación de la potencia consumida por el sensor en miliwatts (mW).
+     *
      * @param currentMa La corriente nominal reportada por el sensor (mA).
      * @param batteryVoltage El voltaje actual de la batería (V).
      * @return La potencia calculada en mW.
