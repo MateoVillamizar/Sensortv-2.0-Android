@@ -20,5 +20,5 @@ data class SensorChartConfig(
     val stepX: Float = 3f,
     val stepY: Float = 1f,
 
-    val windowSize: Float = 20f
+    val windowSize: Float = 22f
 )

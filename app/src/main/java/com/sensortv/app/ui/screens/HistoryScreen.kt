@@ -134,10 +134,3 @@ fun HistoryRecordCard(
         }
     }
 }
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun HistoryScreenPreview() {
-    val dummyNavController = rememberNavController()
-    HistoryScreen(navController = dummyNavController)
-}

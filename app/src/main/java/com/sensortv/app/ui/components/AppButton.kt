@@ -52,7 +52,7 @@ fun AppButton(
         }
     }
 
-    // Botón de énfasis medio (Tonal)
+    // Botón de énfasis medio (Filled Tonal Button)
     else {
         FilledTonalButton(
             onClick = onClick,

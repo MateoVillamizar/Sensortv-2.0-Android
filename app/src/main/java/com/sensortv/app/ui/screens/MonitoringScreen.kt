@@ -72,7 +72,7 @@ fun MonitoringScreen(
             verticalArrangement = Arrangement.spacedBy(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ){
-            // Lista de sensores en monitoreo (simulada)
+            // Lista de sensores en monitoreo
             val sensorsMonitoringList = realSensors.map { sensor ->
                 SensorMonitorInfo(
                     sensorName = sensor.displayName,
@@ -266,14 +266,4 @@ private fun SensorExpandableInfoCard(sensor: SensorMonitorInfo) {
             }
         }
     }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun MonitoringScreenPreview() {
-    val dummyNavController = rememberNavController()
-    MonitoringScreen(
-        navController = dummyNavController,
-        viewModel = TODO()
-    )
 }

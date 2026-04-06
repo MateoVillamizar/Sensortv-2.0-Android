@@ -1,15 +1,17 @@
 package com.sensortv.app.data.model
 
 /**
- * Modela los datos asociados a un sensor.
+ * Modelo integral de datos que captura el estado y la identidad de un sensor físico.
  *
- * @property type Tipo de sensor definido por las constantes de [android.hardware.Sensor].
- * @property displayName Nombre simplificado del sensor para el usuario.
- * @property hardwareName Nombre técnico del componente físico del fabricante.
- * @property values Lista de valores capturados (ej. aceleración en m/s² para los ejes X, Y, Z).
- * @property frequencyHz Velocidad de actualización del sensor calculada en tiempo real.
+ * @property type Identificador único (ej. Sensor.TYPE_ACCELEROMETER).
+ * @property displayName Nombre legible del sensor para el usuario (ej. "Acelerómetro").
+ * @property hardwareName Identificador del componente físico del fabricante.
+ * @property values Lista de valores crudos capturados (ejes X,Y,Z o valores únicos).
+ * @property frequencyHz Velocidad de muestreo actual del sensor calculada en Hertz (Hz).
  * @property available Indica si el hardware del sensor está presente y operativo en el dispositivo.
- * @property nominalConsumptionmA Consumo de corriente del sensor estimada por el fabricante en mA (miliamperios).
+ * @property nominalConsumptionmA Corriente teórica fija consumida por el sensor en mA. (miliamperios).
+ * @property estimatedPowerMw Potencia estimada del sensor en miliwatts (mW)
+ * calculada como Voltaje Batería * nominalConsumptionmA.
  */
 data class SensorData(
     val type: Int,

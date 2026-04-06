@@ -11,38 +11,31 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 
 /**
- * Implementación concreta de [SensorDataSource] que interactúa directamente con el hardware de Android.
+ * Implementación concreta de [SensorDataSource] que interactúa con el hardware a través del [SensorManager].
+ * * Convierte las lecturas de los sensores del sistema en un flujo [Flow] asíncrono,
+ * gestionando el ciclo de vida del hardware para evitar consumo innecesario de energía.
  *
- * Esta clase implementa [SensorEventListener] para recibir actualizaciones del [SensorManager]
- * y las transforma en un flujo de datos asíncrono.
- *
- * @param context Contexto de la aplicación necesario para acceder al servicio de sensores.
+ * @param context Contexto necesario para obtener el servicio SENSOR_SERVICE.
  */
 class AndroidSensorDataSource(
     private val context: Context
 ) : SensorDataSource, SensorEventListener {
 
     private val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-
-    /** Mapa para rastrear el último timestamp de cada sensor y calcular su frecuencia. */
-    private val lastTimestamps = mutableMapOf<Int, Long>()
-
-    // fCanal interno para emitir datos hacia el Flow.
+    private val lastTimestamps = mutableMapOf<Int, Long>()      // Identificador del sensor -> Último timestamp
     private lateinit var emitter: (SensorData) -> Unit
 
     /**
-     * Registra los listeners para los sensores seleccionados y abre un flujo de datos.
-     * Al cerrarse el flujo, se cancela automáticamente el registro de los sensores.
+     * Activa los sensores seleccionados y comienza la emisión de datos.
+     * * Registra los listeners al iniciar la recolección y los des-registra
+     * automáticamente cuando el colector se detiene (gracias a [awaitClose]).
      *
-     * @note La recolección de este Flow está sujeta al ciclo de vida del colector.
-     * Si se utiliza en una ViewModel vinculada a una UI, la medición se detendrá
-     * al destruir o pausar dicha UI debido a [awaitClose]. Para mediciones en
-     * segundo plano, se recomienda ejecutar este Flow dentro de un Foreground Service.
+     * @return [Flow] de [SensorData] con cálculos de frecuencia en tiempo real.
      */
     override fun observeSensorData(): Flow<SensorData> = callbackFlow {
-
+        // Configurar el emisor interno para conectar el callback con el Flow
         emitter = { data ->
-            trySend(data).isSuccess
+            trySend(data)
         }
 
         val sensorTypes = listOf(
@@ -53,6 +46,7 @@ class AndroidSensorDataSource(
             Sensor.TYPE_PROXIMITY
         )
 
+        // Registro para cada sensor
         sensorTypes.forEach { type ->
             sensorManager.getDefaultSensor(type)?.let { sensor ->
                 sensorManager.registerListener(
@@ -63,42 +57,35 @@ class AndroidSensorDataSource(
             }
         }
 
-        // Se ejecuta cuando el Flow se cancela o se deja de observar
+        // Garantía de limpieza al cerrar el flujo
         awaitClose {
             sensorManager.unregisterListener(this@AndroidSensorDataSource)
         }
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-        // No necesario por ahora
+        // No es necesario en la aplicación actual. Implementación es obligatoria por contrato
     }
 
     /**
-     * Callback invocado por el sistema Android cada vez que un sensor tiene nuevos datos.
-     * Realiza el cálculo de frecuencia y empaqueta la información en [SensorData].
+     * Callback invocado por el sistema Android cada vez que un sensor registra un cambio (nuevos datos).
+     * Procesa cada actualización de hardware detectada por el sistema.
      *
-     * @param event Objeto [SensorEvent] que contiene los datos del sensor.
-     */
+     * 1. Calcula la frecuencia (Hz) basándose en el tiempo transcurrido desde el último evento.
+     * 2. Empaqueta los datos en [SensorData] y lo envía al flujo mediante el 'emitter'.
+     *
+     * @param event paquete de datos de Android cada vez que un sensor cambia. Contiene valores,
+     * tipo de sensor y consumo nominal de corriente (mA).
+    */
     override fun onSensorChanged(event: SensorEvent?) {
+
         event ?: return
 
         val type = event.sensor.type
         val currentTime = System.nanoTime()
-        val last = lastTimestamps[type] ?: 0L
+        val frequency = calculateFrequency(type, currentTime)
 
-        // Cálculo de frecuencia: f = 1 / (tiempo_actual - tiempo_previo)
-        val frequency = if (last != 0L) {
-            val delta = (currentTime - last) / 1_000_000_000f
-
-            if (delta > 0f)
-                1f / delta
-            else
-                0f
-
-        } else {
-            0f
-        }
-
+        // Guardar el timestamp actual para el cálculo de la siguiente muestra
         lastTimestamps[type] = currentTime
 
         val data = SensorData(
@@ -115,7 +102,10 @@ class AndroidSensorDataSource(
     }
 
     /**
-     * Obtiene el nombre legible del tipo de sensor de Android.
+     * Obtiene el nombre legible para el usuario según el tipo de sensor en Hardware.
+     *
+     * @param type Identificador único del sensor en Hardware.
+     * @return Nombre legible para el usuario.
      */
     private fun getSensorDisplayName(type: Int): String {
         return when (type) {
@@ -126,5 +116,21 @@ class AndroidSensorDataSource(
             Sensor.TYPE_PROXIMITY -> "Proximidad"
             else -> "Sensor"
         }
+    }
+
+    /**
+     * Calcula la frecuencia de muestreo en Hercios (Hz) basándose en el intervalo de tiempo.
+     *
+     * @param type Identificador del sensor para buscar su última marca de tiempo.
+     * @param currentTime Tiempo actual en nanosegundos.
+     * @return Frecuencia calculada como 1/Δt, o 0f si es la primera lectura.
+     */
+    private fun calculateFrequency(type: Int, currentTime: Long): Float {
+        val lastTime = lastTimestamps[type] ?: return 0F
+
+        // Convertimos la diferencia de nanosegundos a segundos (1s = 1,000,000,000ns)
+        val deltaSeconds = (currentTime - lastTime) / 1_000_000_000f
+
+        return if (deltaSeconds > 0f) 1f / deltaSeconds else 0f
     }
 }

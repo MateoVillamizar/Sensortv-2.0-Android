@@ -4,14 +4,13 @@ import com.sensortv.app.data.model.SensorData
 import kotlinx.coroutines.flow.Flow
 
 /**
- * Interfaz que define el Contrato de la fuente de origen de los datos de los sensores.
+ * Interfaz que define el contrato para la obtención de datos de los sensores de hardware.
  */
 interface SensorDataSource {
-
     /**
-     * Expone / emite un flujo continuo ([Flow]) de datos de sensores.
-     * Cada vez que un sensor detecta un cambio, emite un nuevo objeto [SensorData].
-     * @return Un flujo reactivo de datos de sensores.
+     * Expone un flujo continuo de datos de varios sensores en tiempo real.
+     *
+     * @return [Flow] que emite [SensorData] cada vez que se detecta un cambio en los sensores
      */
     fun observeSensorData(): Flow<SensorData>
 }

@@ -21,19 +21,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.sensortv.app.ui.model.ChartScale
 import com.sensortv.app.ui.model.ChartScaleCalculator
 import com.sensortv.app.ui.model.SensorChartConfig
 import com.sensortv.app.ui.model.SensorChartData
@@ -42,7 +36,6 @@ import com.sensortv.app.ui.theme.SensorGyroscope
 import com.sensortv.app.ui.theme.SensorLight
 import com.sensortv.app.ui.theme.SensorMagnetometer
 import com.sensortv.app.ui.theme.SensorProximity
-import kotlin.math.ceil
 
 /**
  * Gráfico de potencia estimada de sensores vs tiempo real en segundos utilizando Canvas.

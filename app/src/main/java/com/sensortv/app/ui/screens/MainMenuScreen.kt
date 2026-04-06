@@ -44,7 +44,7 @@ import com.sensortv.app.ui.components.StandardTopBar
 import com.sensortv.app.ui.navigation.AppRoutes
 
 /**
- * Pantalla del menú principal de SensorTV 2.0
+ * Pantalla del menú principal de SensorTV 2.0.
  * Gestiona la presentación del estado de la batería y la lista reactiva de sensores detectados.
  *
  * @param navController Gestor de navegación para redirigir a monitoreo o historial
@@ -299,15 +299,4 @@ private fun RowScope.TableCell(
                 MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun MenuScreenPreview() {
-    // Un NavHostController simulado para el preview
-    val dummyNavController = rememberNavController()
-    MainMenuScreen(
-        navController = dummyNavController,
-        viewModel = TODO()
-    )
 }

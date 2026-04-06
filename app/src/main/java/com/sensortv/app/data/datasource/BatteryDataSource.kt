@@ -1,11 +1,16 @@
 package com.sensortv.app.data.datasource
 
 import com.sensortv.app.data.model.BatteryData
+import kotlinx.coroutines.flow.Flow
 
 /**
- * Interfaz que define el Contrato de la fuente de origen de los datos de la batería.
+ * Interfaz que define el contrato para obtener datos del estado de la batería.
  */
 interface BatteryDataSource {
-
-    fun observeBattery(): kotlinx.coroutines.flow.Flow<BatteryData>
+    /**
+     * Expone un flujo de datos en tiempo real sobre el porcentaje y voltaje.
+     *
+     * @return [Flow] que emite [BatteryData] ante cada cambio del sistema.
+     */
+    fun observeBattery(): Flow<BatteryData>
 }

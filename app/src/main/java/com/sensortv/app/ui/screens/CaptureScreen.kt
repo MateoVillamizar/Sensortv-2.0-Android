@@ -1,6 +1,5 @@
 package com.sensortv.app.ui.screens
 
-import android.R.attr.duration
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,7 +18,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -37,13 +35,13 @@ import com.sensortv.app.ui.components.AppButton
 import com.sensortv.app.ui.components.SamplingFrequencySelector
 import com.sensortv.app.ui.components.StandardTopBar
 import com.sensortv.app.ui.navigation.AppRoutes
-import kotlinx.coroutines.delay
 
 /**
  * Pantalla para configurar y controlar la captura de datos de sensores.
  * Permite definir la duración de la captura, la frecuencia de muestreo y acceder al historial de capturas.
  *
  * @param navController Controlador de navegación utilizado para cambiar de pantalla.
+ * @param viewModel Modelo de vista asociado a la captura de datos.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

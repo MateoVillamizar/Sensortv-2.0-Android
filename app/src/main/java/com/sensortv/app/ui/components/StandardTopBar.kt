@@ -8,7 +8,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 
 /**
- * Componente de la barra superior estándar para las pantallas de la aplicación.
+ * Componente de una barra superior estándar para todas las pantallas de la aplicación.
  *
  * @param topTitle Título a mostrar en la barra superior.
  */
