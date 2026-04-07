@@ -6,34 +6,35 @@ import androidx.lifecycle.ViewModelProvider
 import com.sensortv.app.data.datasource.AndroidBatteryDataSource
 import com.sensortv.app.data.datasource.AndroidSensorDataSource
 import com.sensortv.app.data.repository.BatteryRepositoryImpl
-import com.sensortv.app.data.repository.SensorRepository
 import com.sensortv.app.data.repository.SensorRepositoryImpl
 
 /**
- * Fábrica para crear instancias de [SensorViewModel].
- * Es necesaria porque [SensorViewModel] requiere un [SensorRepository] en su constructor,
- * y el sistema de Android por defecto no sabe cómo proveer dependencias externas.
+ * Fábrica personalizada para la creación del [SensorViewModel].
+ * Android no puede instanciar automáticamente ViewModels que requieran parámetros en su constructor.
+ * 1. Inicializa los DataSources con el contexto del sistema.
+ * 2. Construye los Repositorios inyectando sus respectivas fuentes de datos.
  *
- * @param context El contexto de la aplicación para inicializar [AndroidSensorDataSource].
+ * @param context Necesario para que los DataSources accedan a los servicios de hardware.
+ * @return [SensorViewModelFactory] Instancia completa de [SensorViewModel] lista para uso en UI.
  */
 class SensorViewModelFactory(
     private val context: Context
 ) : ViewModelProvider.Factory {
 
+    // Suprime advertencia de cast inseguro (as T); pero sabemos que es correcto por la lógica del factory.
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-
+        // Se verifica que se esté solicitando el ViewModel (SensorViewModel) correcto
         if (modelClass.isAssignableFrom(SensorViewModel::class.java)) {
 
             // Construcción manual de dependencias
             val sensorDataSource = AndroidSensorDataSource(context)
             val batteryDataSource = AndroidBatteryDataSource(context)
-
             val sensorRepo = SensorRepositoryImpl(sensorDataSource, batteryDataSource)
             val batteryRepo = BatteryRepositoryImpl(batteryDataSource)
 
             return SensorViewModel(sensorRepo, batteryRepo) as T
         }
-        throw IllegalArgumentException("Clase ViewModel desconocida")
+        throw IllegalArgumentException("Error: Clase ViewModel no compatible con esta Factory")
     }
 }
