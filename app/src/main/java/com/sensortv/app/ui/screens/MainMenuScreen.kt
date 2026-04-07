@@ -32,13 +32,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
-import com.sensortv.app.ui.model.SensorInfo
-import com.sensortv.app.presentation.viewmodel.SensorViewModel
+import com.sensortv.app.data.model.SensorData
+import com.sensortv.app.ui.viewmodel.SensorViewModel
 import com.sensortv.app.ui.components.AppButton
 import com.sensortv.app.ui.components.StandardTopBar
 import com.sensortv.app.ui.navigation.AppRoutes
@@ -81,16 +79,7 @@ fun MainMenuScreen(
                 batteryVoltage = batteryInfo?.voltage ?: 0f
             )
 
-            // Lista de sensores del sistema
-            val sensorInfoList = realSensors.map { sensor ->
-                SensorInfo(
-                    sensorType = sensor.displayName,
-                    isAvailable = sensor.available,
-                    sensorPower = sensor.nominalConsumptionmA
-                )
-            }
-
-            SensorTableCard(sensorInfoList)
+            SensorTableCard(realSensors)
 
             AppButton(
                 text = "Monitorear Sensores",
@@ -159,10 +148,10 @@ private fun BatteryInfoCard(
 /**
  * Componente Card que muestra una tabla con información de los sensores detectados.
  *
- * @param sensors Lista del tipo SensorInfo que contiene la información de sensores.
+ * @param sensors Lista del tipo SensorData que contiene la información de sensores.
  */
 @Composable
-private fun SensorTableCard(sensors: List<SensorInfo>) {
+private fun SensorTableCard(sensors: List<SensorData>) {
     Card (
         modifier = Modifier.padding(4.dp),
         colors = CardDefaults.cardColors(
@@ -205,7 +194,7 @@ private fun SensorTableHeader() {
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        TableCell("Tipo de Sensor", weight = 1.4f, isHeader = true)
+        TableCell("Nombre del Sensor", weight = 1.4f, isHeader = true)
 
         VerticalDivider(
             modifier = Modifier
@@ -226,10 +215,10 @@ private fun SensorTableHeader() {
 /**
  * Componente Row que define una fila de la tabla de sensores.
  *
- * @param sensor Información del sensor.
+ * @param sensor Información del según el modelo SensorData.
  */
 @Composable
-private fun SensorRow(sensor: SensorInfo) {
+private fun SensorRow(sensor: SensorData) {
 
     val availabilityText =
         if (sensor.isAvailable) "Disponible" else "No disponible"
@@ -244,7 +233,7 @@ private fun SensorRow(sensor: SensorInfo) {
             .fillMaxWidth()
             .height(IntrinsicSize.Min)
     ) {
-        TableCell(sensor.sensorType, weight = 1.4f, textColor = availabilityColor)
+        TableCell(sensor.displayName, weight = 1.4f, textColor = availabilityColor)
 
         VerticalDivider(
             modifier = Modifier
@@ -258,7 +247,7 @@ private fun SensorRow(sensor: SensorInfo) {
             .fillMaxHeight()
             .width(1.dp), color = MaterialTheme.colorScheme.outline)
 
-        TableCell("${sensor.sensorPower} mA", textColor = availabilityColor)
+        TableCell("${sensor.nominalConsumptionmA} mA", textColor = availabilityColor)
     }
 }
 

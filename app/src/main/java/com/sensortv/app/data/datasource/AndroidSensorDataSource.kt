@@ -94,7 +94,7 @@ class AndroidSensorDataSource(
             hardwareName = event.sensor.name,
             values = event.values.toList(),
             frequencyHz = frequency,
-            available = true,
+            isAvailable = true,
             nominalConsumptionmA = event.sensor.power
         )
 

@@ -1,4 +1,4 @@
-package com.sensortv.app.presentation.viewmodel
+package com.sensortv.app.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -120,7 +120,7 @@ class SensorViewModel(
                     sensor.copy(
                         values = newData.values,
                         frequencyHz = newData.frequencyHz,
-                        available = true,
+                        isAvailable = true,
                         estimatedPowerMw = newData.estimatedPowerMw
                     )
                 } else sensor
@@ -129,14 +129,6 @@ class SensorViewModel(
             if (sensorExists) updatedList else updatedList + newData
         }
     }
-
-//    /**
-//     * Procesa y estructura los datos para la representación gráfica de potencia estimada.
-//     * - Calcula el tiempo transcurrido (elapsedSeconds) y añade un nuevo punto de medición a cada sensor.
-//     * Mantiene un buffer limitado (últimos 25 puntos) para optimizar el uso de memoria y la fluidez de la interfaz.
-//     *
-//     * @param sensors Lista actual de sensores con sus potencias calculadas.
-//     */
 
     /**
      * Actualiza los datos de la gráfica utilizando un Mapa para optimizar las búsquedas.

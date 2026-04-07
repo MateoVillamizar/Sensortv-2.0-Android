@@ -30,7 +30,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import com.sensortv.app.presentation.viewmodel.SensorViewModel
+import com.sensortv.app.ui.viewmodel.SensorViewModel
 import com.sensortv.app.ui.components.AppButton
 import com.sensortv.app.ui.components.SamplingFrequencySelector
 import com.sensortv.app.ui.components.StandardTopBar

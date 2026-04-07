@@ -6,8 +6,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.sensortv.app.presentation.viewmodel.SensorViewModel
-import com.sensortv.app.presentation.viewmodel.SensorViewModelFactory
+import com.sensortv.app.ui.viewmodel.SensorViewModel
+import com.sensortv.app.ui.viewmodel.SensorViewModelFactory
 import com.sensortv.app.ui.screens.CaptureScreen
 import com.sensortv.app.ui.screens.HistoryScreen
 import com.sensortv.app.ui.screens.MainMenuScreen

@@ -1,4 +1,4 @@
-package com.sensortv.app.presentation.viewmodel
+package com.sensortv.app.ui.viewmodel
 
 import android.content.Context
 import androidx.lifecycle.ViewModel

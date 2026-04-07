@@ -30,17 +30,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
-import com.sensortv.app.presentation.viewmodel.SensorViewModel
+import com.sensortv.app.data.model.SensorData
+import com.sensortv.app.ui.viewmodel.SensorViewModel
 import com.sensortv.app.ui.components.AppButton
 import com.sensortv.app.ui.components.Chart.SensorPowerChart
 import com.sensortv.app.ui.components.StandardTopBar
 import com.sensortv.app.ui.components.getSensorIcon
-import com.sensortv.app.ui.model.SensorMonitorInfo
 import com.sensortv.app.ui.navigation.AppRoutes
 
 /**
@@ -72,21 +70,12 @@ fun MonitoringScreen(
             verticalArrangement = Arrangement.spacedBy(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ){
-            // Lista de sensores en monitoreo
-            val sensorsMonitoringList = realSensors.map { sensor ->
-                SensorMonitorInfo(
-                    sensorName = sensor.displayName,
-                    hardware = sensor.hardwareName,
-                    baseCurrentMa = sensor.nominalConsumptionmA,
-                    currentPowerMw = sensor.estimatedPowerMw
-                )
-            }
 
             item {
                 GeneralInfoCard(
                     batteryPercent = batteryInfo?.percentage ?: 0,
                     batteryVoltage = batteryInfo?.voltage ?: 0f,
-                    sensorsAvailable = sensorsMonitoringList.size,
+                    sensorsAvailable = realSensors.size,
                     averagePower = 23.7f
                 )
             }
@@ -110,7 +99,7 @@ fun MonitoringScreen(
                     color = MaterialTheme.colorScheme.primary
                 )
             }
-            items(sensorsMonitoringList) { sensor ->
+            items(realSensors) { sensor ->
                 SensorExpandableInfoCard(sensor)
             }
 
@@ -192,10 +181,10 @@ private fun GeneralInfoCard(
 /**
  * Componente Card que muestra información detallada de un sensor específico en el monitoreo.
  *
- * @param sensor Información del sensor a mostrar.
+ * @param sensor Información del sensor a mostrar en detalle.
  */
 @Composable
-private fun SensorExpandableInfoCard(sensor: SensorMonitorInfo) {
+private fun SensorExpandableInfoCard(sensor: SensorData) {
 
     // Estado que controla si la tarjeta está expandida o colapsada
     var expanded by rememberSaveable { mutableStateOf(false) }
@@ -220,13 +209,13 @@ private fun SensorExpandableInfoCard(sensor: SensorMonitorInfo) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Icon(
-                    imageVector = getSensorIcon(sensor.sensorName),
-                    contentDescription = sensor.sensorName,
+                    imageVector = getSensorIcon(sensor.displayName),
+                    contentDescription = sensor.displayName,
                     tint = MaterialTheme.colorScheme.primary
                 )
 
                 Text(
-                    text = sensor.sensorName,
+                    text = sensor.displayName,
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Center,
@@ -247,19 +236,19 @@ private fun SensorExpandableInfoCard(sensor: SensorMonitorInfo) {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "Hardware: ${sensor.hardware}",
+                    text = "Hardware: ${sensor.hardwareName}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 Text(
-                    text = "Consumo base: ${sensor.baseCurrentMa} mA",
+                    text = "Consumo base: ${sensor.nominalConsumptionmA} mA",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Text(
-                    text = "Potencia actual: ${"%.4f".format(sensor.currentPowerMw)} mW",
+                    text = "Potencia actual: ${"%.4f".format(sensor.estimatedPowerMw)} mW",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
