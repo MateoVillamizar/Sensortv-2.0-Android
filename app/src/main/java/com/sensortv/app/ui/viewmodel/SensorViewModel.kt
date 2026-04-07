@@ -2,16 +2,15 @@ package com.sensortv.app.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.sensortv.app.data.repository.BatteryRepository
-import com.sensortv.app.data.repository.SensorRepository
 import com.sensortv.app.data.model.BatteryData
+import com.sensortv.app.data.model.SensorData
+import com.sensortv.app.data.repository.BatteryRepository
+import com.sensortv.app.domain.ObserveSensorPowerUseCase
+import com.sensortv.app.domain.StartCaptureTimerUseCase
 import com.sensortv.app.ui.model.SensorChartData
 import com.sensortv.app.ui.model.SensorChartPoint
-import com.sensortv.app.data.model.SensorData
-import com.sensortv.app.domain.ObserveSensorPowerUseCase
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -24,11 +23,12 @@ import kotlinx.coroutines.launch
  * observables por la UI.
  * - Controla el inicio/fin de la monitorización y los tiempos de captura de datos.
  *
- * @param  sensorRepository Repositorio de sensores y potencia.
+ * @param  observeSensorPowerUseCase Caso de uso para calcular la potencia en tiempo real.
  * @param  batteryRepository Repositorio de datos del estado de la batería.
  */
 class SensorViewModel(
     private val observeSensorPowerUseCase: ObserveSensorPowerUseCase,
+    private val startCaptureTimerUseCase: StartCaptureTimerUseCase,
     private val batteryRepository: BatteryRepository
 ): ViewModel() {
 
@@ -51,6 +51,7 @@ class SensorViewModel(
     private var lastChartUpdate: Long = 0
 
     private var startTime: Long = 0
+    private var remainingSeconds: Int = 0
 
     // Variables de captura de datos
     private val _isCapturing = MutableStateFlow(false)
@@ -195,7 +196,7 @@ class SensorViewModel(
 
     /**
      * Detiene inmediatamente el monitoreo de sensores y libera los recursos.
-     * Cancela el [monitoringJob] para detener la corrutina de observación,
+     * Cancela [monitoringJob] para detener la corrutina de observación,
      * reseteando el estado y liberando recursos para permitir un nuevo inicio.
      */
     fun stopMonitoring() {
@@ -223,38 +224,37 @@ class SensorViewModel(
     }
 
     /**
-     * Inicia el proceso de captura de datos por un tiempo determinado.
-     * - Reinicia el monitoreo para sincronizar el inicio de los datos.
+     * Inicia el proceso de captura de datos utilizando el caso de uso de dominio.
+     * - Reinicia el monitoreo para sincronizar datos.
      * - Activa el estado de captura [_isCapturing] para la UI.
-     * - Lanza un temporizador en segundo plano que resta los segundos restantes.
+     * - Delega la gestión del tiempo al [startCaptureTimerUseCase].
      *
-     * @param durationMinutes Duración total de la captura en minutos.
+     * @param durationMinutes Duración total de la captura.
      */
     fun startCapture(durationMinutes: Int) {
         restartMonitoring()
-
-        val totalSeconds = durationMinutes * 60
-        _remainingTime.value = totalSeconds
         _isCapturing.value = true
 
         captureJob?.cancel() // Control de seguridad que cancela cualquier captura previa
 
+        // Recolectar el flujo del temporizador desde el dominio
         captureJob = viewModelScope.launch {
-            while (_remainingTime.value > 0) {
-                delay(1000)
-                _remainingTime.value -= 1
+            startCaptureTimerUseCase(durationMinutes).collect { remainingSeconds ->
+                _remainingTime.value = remainingSeconds
+
+                if (remainingSeconds == 0) stopCapture()
             }
-            _isCapturing.value = false // Cerrar captura
+
         }
     }
 
     /**
-     * Detiene manualmente el proceso de captura antes de que se agote el tiempo.
-     * Cancela la tarea del temporizador y actualiza el estado de UI para
-     * indicar que la captura ha finalizado.
+     * Detiene manualmente el proceso de captura y Cancela la suscripción
+     * al temporizador.
      */
     fun stopCapture() {
         captureJob?.cancel()
         _isCapturing.value = false
+        _remainingTime.value = 0
     }
 }

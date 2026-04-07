@@ -256,7 +256,7 @@ fun CaptureControls(
         )
     }
 
-    if (remainingTime == 1) {
+    if (remainingTime == 0) {
         Toast.makeText(LocalContext.current, "Captura finalizada", Toast.LENGTH_SHORT).show()
     }
 }

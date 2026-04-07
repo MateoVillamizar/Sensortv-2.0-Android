@@ -1,10 +1,8 @@
 package com.sensortv.app.data.repository
 
-import com.sensortv.app.data.datasource.BatteryDataSource
 import com.sensortv.app.data.datasource.SensorDataSource
 import com.sensortv.app.data.model.SensorData
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
 
 /**
  * Implementación concreta de [SensorRepository] que se encarga de exponer los flujos de
