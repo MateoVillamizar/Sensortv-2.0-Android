@@ -8,6 +8,7 @@ import com.sensortv.app.data.model.BatteryData
 import com.sensortv.app.ui.model.SensorChartData
 import com.sensortv.app.ui.model.SensorChartPoint
 import com.sensortv.app.data.model.SensorData
+import com.sensortv.app.domain.ObserveSensorPowerUseCase
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+// Pendiente AJUSTAR DOCUMENTACIÓN LUEGO DE QUE IMPLEMENTACIÓN DE DOMAIN LAYER
 /**
  * ViewModel encargado de gestionar la lógica de presentación y estado de SensorTV 2.0.
  * - Se encarga de transformar los flujos de datos crudos (repositorio) en estados
@@ -26,7 +28,7 @@ import kotlinx.coroutines.launch
  * @param  batteryRepository Repositorio de datos del estado de la batería.
  */
 class SensorViewModel(
-    private val sensorRepository: SensorRepository,
+    private val observeSensorPowerUseCase: ObserveSensorPowerUseCase,
     private val batteryRepository: BatteryRepository
 ): ViewModel() {
 
@@ -87,7 +89,7 @@ class SensorViewModel(
      */
     @OptIn(FlowPreview::class)
     private suspend fun observeSensors() {
-        sensorRepository.observeSensors().collect { newData ->
+        observeSensorPowerUseCase().collect { newData ->
             // Actualización inmediata de la lista de texto/valores
             updateSensorList(newData)
 

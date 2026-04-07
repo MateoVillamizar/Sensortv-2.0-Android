@@ -27,10 +27,10 @@ class AndroidSensorDataSource(
 
     /**
      * Activa los sensores seleccionados y comienza la emisión de datos.
-     * * Registra los listeners al iniciar la recolección y los des-registra
+     * - Registra los listeners al iniciar la recolección y los des-registra
      * automáticamente cuando el colector se detiene (gracias a [awaitClose]).
      *
-     * @return [Flow] de [SensorData] con cálculos de frecuencia en tiempo real.
+     * @return [Flow] de [SensorData] con frecuencia en tiempo real.
      */
     override fun observeSensorData(): Flow<SensorData> = callbackFlow {
         // Configurar el emisor interno para conectar el callback con el Flow

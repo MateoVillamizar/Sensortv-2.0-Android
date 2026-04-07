@@ -7,14 +7,16 @@ import com.sensortv.app.data.datasource.AndroidBatteryDataSource
 import com.sensortv.app.data.datasource.AndroidSensorDataSource
 import com.sensortv.app.data.repository.BatteryRepositoryImpl
 import com.sensortv.app.data.repository.SensorRepositoryImpl
+import com.sensortv.app.domain.ObserveSensorPowerUseCase
 
 /**
  * Fábrica personalizada para la creación del [SensorViewModel].
  * Android no puede instanciar automáticamente ViewModels que requieran parámetros en su constructor.
  * 1. Inicializa los DataSources con el contexto del sistema.
  * 2. Construye los Repositorios inyectando sus respectivas fuentes de datos.
+ * 3. Instancia los Casos de Uso de la capa Domain.
  *
- * @param context Necesario para que los DataSources accedan a los servicios de hardware.
+ * @param context Contexto necesario para que los DataSources accedan a los servicios de hardware.
  * @return [SensorViewModelFactory] Instancia completa de [SensorViewModel] lista para uso en UI.
  */
 class SensorViewModelFactory(
@@ -30,10 +32,13 @@ class SensorViewModelFactory(
             // Construcción manual de dependencias
             val sensorDataSource = AndroidSensorDataSource(context)
             val batteryDataSource = AndroidBatteryDataSource(context)
-            val sensorRepo = SensorRepositoryImpl(sensorDataSource, batteryDataSource)
+
+            val sensorRepo = SensorRepositoryImpl(sensorDataSource)
             val batteryRepo = BatteryRepositoryImpl(batteryDataSource)
 
-            return SensorViewModel(sensorRepo, batteryRepo) as T
+            val observeSensorPowerUseCase = ObserveSensorPowerUseCase(sensorRepo, batteryRepo)
+
+            return SensorViewModel(observeSensorPowerUseCase, batteryRepo) as T
         }
         throw IllegalArgumentException("Error: Clase ViewModel no compatible con esta Factory")
     }

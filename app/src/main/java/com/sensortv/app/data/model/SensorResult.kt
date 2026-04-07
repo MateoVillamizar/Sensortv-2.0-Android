@@ -10,7 +10,6 @@ package com.sensortv.app.data.model
  * @property totalConsume Consumo acumulado estimado del sensor (expresado en Joules).
  */
 
-// NO SE TIENE CLARO SI SEGUIRÁ EXISTIENDO O SE DEBE MODIFICAR. PENDIENTE
 data class SensorResult(
     val sensorType: Int,
     val displayName: String,
