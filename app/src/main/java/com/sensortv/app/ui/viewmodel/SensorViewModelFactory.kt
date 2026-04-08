@@ -3,12 +3,17 @@ package com.sensortv.app.ui.viewmodel
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.room.Room
 import com.sensortv.app.data.datasource.AndroidBatteryDataSource
+import com.sensortv.app.data.datasource.AndroidCsvDataSource
 import com.sensortv.app.data.datasource.AndroidSensorDataSource
+import com.sensortv.app.data.datasource.AppDatabase
 import com.sensortv.app.data.repository.BatteryRepositoryImpl
+import com.sensortv.app.data.repository.CaptureRepositoryImpl
 import com.sensortv.app.data.repository.SensorRepositoryImpl
 import com.sensortv.app.domain.CalculateEnergyUseCase
 import com.sensortv.app.domain.ObserveSensorPowerUseCase
+import com.sensortv.app.domain.SaveCaptureUseCase
 import com.sensortv.app.domain.StartCaptureTimerUseCase
 
 /**
@@ -31,7 +36,16 @@ class SensorViewModelFactory(
         // Se verifica que se esté solicitando el ViewModel (SensorViewModel) correcto
         if (modelClass.isAssignableFrom(SensorViewModel::class.java)) {
 
-            // Construcción manual de dependencias
+            // Construcción de dependencias (Base de Datos)
+            val db = Room.databaseBuilder(context, AppDatabase::class.java, "sensor_tv_2.0_db").build()
+            val captureDao = db.captureDao()
+
+            val captureRepo = CaptureRepositoryImpl(captureDao)
+            val csvDataSource = AndroidCsvDataSource(context)
+
+            val saveCaptureUseCase = SaveCaptureUseCase(csvDataSource, captureRepo)
+
+            // Construcción de dependencias
             val sensorDataSource = AndroidSensorDataSource(context)
             val batteryDataSource = AndroidBatteryDataSource(context)
 
