@@ -111,7 +111,7 @@ class AndroidSensorDataSource(
         return when (type) {
             Sensor.TYPE_ACCELEROMETER -> "Acelerómetro"
             Sensor.TYPE_GYROSCOPE -> "Giroscopio"
-            Sensor.TYPE_LIGHT -> "Sensor de Luz"
+            Sensor.TYPE_LIGHT -> "Luminosidad"
             Sensor.TYPE_MAGNETIC_FIELD -> "Magnetómetro"
             Sensor.TYPE_PROXIMITY -> "Proximidad"
             else -> "Sensor"

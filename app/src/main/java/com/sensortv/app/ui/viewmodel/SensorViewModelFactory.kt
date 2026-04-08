@@ -39,7 +39,6 @@ class SensorViewModelFactory(
 
             // Construcción de dependencias
             val db = DatabaseProvider.getDatabase(context)
-               // Room.databaseBuilder(context, AppDatabase::class.java, "sensor_tv_2.0_db").build()
             val captureDao = db.captureDao()
 
             val sensorDataSource = AndroidSensorDataSource(context)

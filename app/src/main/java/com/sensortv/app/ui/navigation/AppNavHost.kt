@@ -13,6 +13,7 @@ import com.sensortv.app.ui.screens.HistoryScreen
 import com.sensortv.app.ui.screens.MainMenuScreen
 import com.sensortv.app.ui.screens.MonitoringScreen
 import com.sensortv.app.ui.viewmodel.HistoryViewModel
+import com.sensortv.app.ui.viewmodel.HistoryViewModelFactory
 
 /**
  * Define el grafo de navegación principal de SensorTV 2.0.
@@ -31,7 +32,7 @@ fun AppNavHost(navController: NavHostController) {
         factory = SensorViewModelFactory(context)
     )
     val historyViewModel: HistoryViewModel = viewModel(
-        factory = SensorViewModelFactory(context)
+        factory = HistoryViewModelFactory(context)
     )
 
     // Contenedor principal de navegación que gestiona y muestra los destinos según el estado del NavController

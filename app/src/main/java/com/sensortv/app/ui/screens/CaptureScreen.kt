@@ -42,7 +42,7 @@ import com.sensortv.app.ui.navigation.AppRoutes
  * Permite definir la duración de la captura, la frecuencia de muestreo y acceder al historial de capturas.
  *
  * @param navController Controlador de navegación utilizado para cambiar de pantalla.
- * @param viewModel Modelo de vista asociado a la captura de datos.
+ * @param viewModel instancia de [SensorViewModel] asociado a la captura de datos.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -113,7 +113,6 @@ fun CaptureScreen(
                     } else {
                         // Detiene captura
                         viewModel.stopCapture()
-                        Toast.makeText(context, "Captura cancelada", Toast.LENGTH_SHORT).show()
                     }
                 },
                 isValidDuration = isValidDuration,
@@ -209,8 +208,8 @@ fun CaptureStatusCard() {
                 color = MaterialTheme.colorScheme.primary
             )
 
-            Text("La captura de datos se guardará automáticamente como archivo CSV al finalizar la sesión.")
-            Text("Ruta del archivo: /data/data/com.sensortv.app/files/captures/")
+            Text("La captura de datos se guardará automáticamente en dos archivo CSV (mediciones y Total) al finalizar la sesión.")
+            Text("Ruta de los archivo: /Android/storage/emulated/0/Android/data/com.sensortv.app/files/captures/")
         }
     }
 }

@@ -44,6 +44,7 @@ import com.sensortv.app.ui.navigation.AppRoutes
 /**
  * Pantalla que muestra la lectura y monitoreo de los sensores en tiempo real mediante una gráfica lineal.
  *
+ * @param viewModel Instancia de [SensorViewModel] asociado al monitoreo de sensores.
  * @param navController Controlador de navegación para manejar la navegación entre pantallas.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -76,7 +77,6 @@ fun MonitoringScreen(
                     batteryPercent = batteryInfo?.percentage ?: 0,
                     batteryVoltage = batteryInfo?.voltage ?: 0f,
                     sensorsAvailable = realSensors.size,
-                    averagePower = 23.7f
                 )
             }
 
@@ -129,14 +129,12 @@ fun MonitoringScreen(
  * @param batteryPercent Porcentaje de batería actual.
  * @param batteryVoltage Voltaje actual de la batería.
  * @param sensorsAvailable Cantidad de sensores disponibles.
- * @param averagePower Promedio de potencia en tiempo real de todos los sensores.
  */
 @Composable
 private fun GeneralInfoCard(
     batteryPercent: Int,
     batteryVoltage: Float,
     sensorsAvailable: Int,
-    averagePower: Float
 ) {
 
     val formattedVoltage = "%.3f V".format(batteryVoltage)

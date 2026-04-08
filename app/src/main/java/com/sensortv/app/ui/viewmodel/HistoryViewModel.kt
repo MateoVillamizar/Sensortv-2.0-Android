@@ -23,10 +23,11 @@ class HistoryViewModel(
 ): ViewModel() {
 
     /**
-     * Flujo de capturas obtenidas de la base de datos.
+     * Flujo de capturas / registros obtenidos de la base de datos.
      * Se expone como StateFlow para que la UI de Compose lo observe.
      */
     val historyRecords: StateFlow<List<CaptureRecordEntity>> = getCaptureHistoryUseCase()
+        // Convierte Flow en un StateFlow (puede ser observado por UI y mantiene último estado)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),

@@ -26,8 +26,8 @@ class AndroidCsvDataSource(
      */
     override suspend fun writeCsv(fileName: String, content: List<String>): File = withContext(
         Dispatchers.IO) {
-        // Ruta de carpeta propia: /Android/data/com.sensortv.app/files/captures
-        // context.getExternalFilesDir(null) apunta a: /Android/data/com.sensortv.app/files/
+        // Ruta de carpeta propia: /Android/storage/emulated/0/Android/data/com.sensortv.app/files/captures/
+        // context.getExternalFilesDir(null) apunta a: /Android/storage/emulated/0/Android/data/com.sensortv.app/files/
         val directory = File(context.getExternalFilesDir(null), "captures")
 
         if (!directory.exists()) {

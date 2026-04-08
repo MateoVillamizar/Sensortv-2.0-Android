@@ -1,6 +1,7 @@
 package com.sensortv.app.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,19 +16,23 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import com.sensortv.app.data.model.CaptureRecordEntity
 import com.sensortv.app.ui.components.AppButton
 import com.sensortv.app.ui.components.StandardTopBar
-import com.sensortv.app.ui.model.Record
 import com.sensortv.app.ui.viewmodel.HistoryViewModel
 
 /**
  * Pantalla que muestra el historial de registros de datos capturados.
  * Permite exportar y ver los registros.
  *
+ * @param viewModel Instancia de [HistoryViewModel] asociado al historial.
  * @param navController Controlador de navegación utilizado para cambiar de pantalla.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -36,14 +41,8 @@ fun HistoryScreen(
     viewModel: HistoryViewModel,
     navController: NavHostController
 ) {
-
-    // Datos simulados (luego vendrán del repository - Capa de data)
-    val records = listOf(
-        Record(1, "Registro_2026-02-18_14-30.csv", "18/02/2026"),
-        Record(2, "Registro_2026-02-20_09-00.csv", "20/02/2026"),
-        Record(3, "Registro_2026-02-20_16-45.csv", "20/02/2026"),
-        Record(4, "Registro_2026-02-21_11-10.csv", "21/02/2026")
-    )
+    // Convertir el StateFlow en un Estado de Compose
+    val records by viewModel.historyRecords.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = { StandardTopBar("Historial de Registros") }
@@ -59,9 +58,28 @@ fun HistoryScreen(
             items(records) { record ->
                 HistoryRecordCard(
                     record = record,
-                    onExport = { /* Futura acción al exportar */ },
+                    onDelete = { viewModel.deleteRecord(record) },
+                    onShare = { /* Futura acción al exportar */ },
                     onView = { /* Futura acción al ver */ }
                 )
+            }
+
+            if (records.isEmpty()) {
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = "No hay registros guardados actualmente",
+                            color = MaterialTheme.colorScheme.onSurface,
+                            style = MaterialTheme.typography.bodyLarge,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        )
+                    }
+                }
             }
 
             item {
@@ -79,15 +97,22 @@ fun HistoryScreen(
  * Componente Card que muestra un registro de datos capturados con la posibilidad de exportar y ver.
  *
  * @param record Información del registro.
- * @param onExport Callback invocado al exportar un registro.
+ * @param onDelete Callback invocado al eliminar un registro
+ * @param onShare Callback invocado al exportar un registro.
  * @param onView Callback invocado al ver un registro.
  */
 @Composable
 fun HistoryRecordCard(
-    record: Record,
-    onExport: () -> Unit,
+    record: CaptureRecordEntity,
+    onDelete: () -> Unit,
+    onShare: () -> Unit,
     onView: () -> Unit
 ) {
+    // Formateador de fecha simple
+    val dateLabel = java.time.Instant.ofEpochMilli(record.dateMillis)
+        .atZone(java.time.ZoneId.systemDefault())
+        .format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))
+
     Card(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -100,17 +125,18 @@ fun HistoryRecordCard(
             Text(
                 text = record.fileName,
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1
             )
 
             Text(
-                text = "ID: ${record.id}",
-                style = MaterialTheme.typography.titleMedium,
+                text = "Duración: ${record.durationMinutes} min | Muestreo: ${record.samplingFrequencySeconds}(s)",
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.primary
             )
 
             Text(
-                text = "Fecha: ${record.date}",
+                text = "Fecha: $dateLabel",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -120,18 +146,17 @@ fun HistoryRecordCard(
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-
-                AppButton(
-                    text = "Exportar",
-                    onClick = onExport,
-                    isPrimary = true
-                )
-
-                AppButton(
-                    text = "Ver",
-                    onClick = onView,
-                    isPrimary = false
-                )
+                // Utilización de pesos (weight) para que los botones se repartan el espacio
+                Box(modifier = Modifier.weight(1f)) {
+                    AppButton(text = "Ver", onClick = onView, isPrimary = true)
+                }
+                Box(modifier = Modifier.weight(1f)) {
+                    AppButton(text = "Compartir", onClick = onShare, isPrimary = true)
+                }
+                // Botón de eliminar (puedes usar un IconButton si prefieres)
+                Box(modifier = Modifier.weight(0.5f)) {
+                    AppButton(text = "X", onClick = onDelete, isPrimary = false)
+                }
             }
         }
     }
