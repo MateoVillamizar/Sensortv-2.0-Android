@@ -1,5 +1,6 @@
 package com.sensortv.app.ui.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sensortv.app.data.model.BatteryData
@@ -315,29 +316,35 @@ class SensorViewModel(
      * y lanza la lógica de guardado en dominio.
      */
     fun stopCapture() {
-        if(_isCapturing.value) return // Evitar ejecuciones duplicadas
-        val timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"))
+        if(!_isCapturing.value) return // Evitar ejecuciones duplicadas
+        val timestamp = java.time.LocalDateTime.now()
+            .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"))
 
         val results = prepareSensorResults()
         val duration = (_remainingTime.value / 60) // Duración original
 
         viewModelScope.launch {
-            saveCaptureUseCase(
-                timestamp = timestamp,
-                durationMinutes = duration,
-                samplingFrequency = userSamplingFrequency,
-                sensorResults = results
-            )
+            try {
+                saveCaptureUseCase(
+                    timestamp = timestamp,
+                    durationMinutes = duration,
+                    samplingFrequency = userSamplingFrequency,
+                    sensorResults = results
+                )
+            } catch (e: Exception) {
+                // Loguear error si algo falla en el guardado
+                Log.e("CaptureViewModel", "Error al guardar captura", e)
+            } finally {
+                // Limpieza de estados tras el guardado
+                _isCapturing.value = false
+                _remainingTime.value = 0
+                sensorEnergyMap.clear()
+                captureJob?.cancel()
+
+                // Reiniciar monitoreo normal
+                userSamplingFrequency = 3
+                restartMonitoring()
+            }
         }
-
-        // Limpieza de estados tras el guardado
-        _isCapturing.value = false
-        _remainingTime.value = 0
-        sensorEnergyMap.clear()
-        captureJob?.cancel()
-
-        this.userSamplingFrequency = 3
-        restartMonitoring()
-
     }
 }

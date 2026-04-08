@@ -62,7 +62,7 @@ fun CaptureScreen(
 
     // Este bloque se ejecuta solo cuando isCapturing pasa de true a false Y el tiempo es 0
     LaunchedEffect(isCapturing) {
-        if (!isCapturing && remainingTime == 0 && duration.isNotEmpty()) {
+        if (!isCapturing && duration.isNotEmpty()) {
             Toast.makeText(context, "Captura guardada exitosamente", Toast.LENGTH_LONG).show()
         }
     }
@@ -262,8 +262,4 @@ fun CaptureControls(
             isPrimary = true,
         )
     }
-//
-//    if (remainingTime == 0 && isCapturing) {
-//        Toast.makeText(LocalContext.current, "Captura finalizada", Toast.LENGTH_SHORT).show()
-//    }
 }

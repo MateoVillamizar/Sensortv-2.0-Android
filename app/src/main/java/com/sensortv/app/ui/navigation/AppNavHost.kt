@@ -12,6 +12,7 @@ import com.sensortv.app.ui.screens.CaptureScreen
 import com.sensortv.app.ui.screens.HistoryScreen
 import com.sensortv.app.ui.screens.MainMenuScreen
 import com.sensortv.app.ui.screens.MonitoringScreen
+import com.sensortv.app.ui.viewmodel.HistoryViewModel
 
 /**
  * Define el grafo de navegación principal de SensorTV 2.0.
@@ -24,9 +25,12 @@ import com.sensortv.app.ui.screens.MonitoringScreen
 @Composable
 fun AppNavHost(navController: NavHostController) {
 
-    // Obtenemos el contexto de Android para la fábrica
+    // Obtenemos el contexto de Android para la fábrica y creamos viewmModels
     val context = LocalContext.current
-    val viewModel: SensorViewModel = viewModel(
+    val sensorViewModel: SensorViewModel = viewModel(
+        factory = SensorViewModelFactory(context)
+    )
+    val historyViewModel: HistoryViewModel = viewModel(
         factory = SensorViewModelFactory(context)
     )
 
@@ -37,26 +41,30 @@ fun AppNavHost(navController: NavHostController) {
     ) {
         composable(AppRoutes.Menu.route) {
             MainMenuScreen(
-                viewModel = viewModel,
+                viewModel = sensorViewModel,
                 navController = navController
             )
         }
 
         composable(AppRoutes.Monitoring.route) {
             MonitoringScreen(
-                viewModel = viewModel,
+                viewModel = sensorViewModel,
                 navController = navController
             )
         }
 
         composable(AppRoutes.Capture.route) {
             CaptureScreen(
-                viewModel = viewModel,
-                navController = navController)
+                viewModel = sensorViewModel,
+                navController = navController
+            )
         }
 
         composable(AppRoutes.History.route) {
-            HistoryScreen(navController = navController)
+            HistoryScreen(
+                viewModel = historyViewModel,
+                navController = navController
+            )
         }
     }
 }

@@ -13,4 +13,11 @@ interface CsvDataSource {
      * @return [File] el objeto del archivo creado.
      */
     suspend fun writeCsv(fileName: String, content: List<String>): File
+
+    /**
+     * Elimina un archivo físico del almacenamiento interno del dispositivo.
+     * @param filePath Ruta absoluta del archivo.
+     * @return True si se eliminó exitosamente, false de lo contrario.
+     */
+    suspend fun deleteCsvFile(filePath: String): Boolean
 }

@@ -22,6 +22,7 @@ import androidx.navigation.NavHostController
 import com.sensortv.app.ui.components.AppButton
 import com.sensortv.app.ui.components.StandardTopBar
 import com.sensortv.app.ui.model.Record
+import com.sensortv.app.ui.viewmodel.HistoryViewModel
 
 /**
  * Pantalla que muestra el historial de registros de datos capturados.
@@ -31,7 +32,10 @@ import com.sensortv.app.ui.model.Record
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HistoryScreen(navController: NavHostController) {
+fun HistoryScreen(
+    viewModel: HistoryViewModel,
+    navController: NavHostController
+) {
 
     // Datos simulados (luego vendrán del repository - Capa de data)
     val records = listOf(

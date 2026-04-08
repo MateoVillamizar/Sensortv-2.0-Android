@@ -8,6 +8,7 @@ import com.sensortv.app.data.datasource.AndroidBatteryDataSource
 import com.sensortv.app.data.datasource.AndroidCsvDataSource
 import com.sensortv.app.data.datasource.AndroidSensorDataSource
 import com.sensortv.app.data.datasource.AppDatabase
+import com.sensortv.app.data.model.DatabaseProvider
 import com.sensortv.app.data.repository.BatteryRepositoryImpl
 import com.sensortv.app.data.repository.CaptureRepositoryImpl
 import com.sensortv.app.data.repository.SensorRepositoryImpl
@@ -37,7 +38,8 @@ class SensorViewModelFactory(
         if (modelClass.isAssignableFrom(SensorViewModel::class.java)) {
 
             // Construcción de dependencias
-            val db = Room.databaseBuilder(context, AppDatabase::class.java, "sensor_tv_2.0_db").build()
+            val db = DatabaseProvider.getDatabase(context)
+               // Room.databaseBuilder(context, AppDatabase::class.java, "sensor_tv_2.0_db").build()
             val captureDao = db.captureDao()
 
             val sensorDataSource = AndroidSensorDataSource(context)
