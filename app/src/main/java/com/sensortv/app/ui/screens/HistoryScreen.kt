@@ -17,13 +17,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
-import com.sensortv.app.ui.model.Record
 import com.sensortv.app.ui.components.AppButton
 import com.sensortv.app.ui.components.StandardTopBar
+import com.sensortv.app.ui.model.Record
 
 /**
  * Pantalla que muestra el historial de registros de datos capturados.

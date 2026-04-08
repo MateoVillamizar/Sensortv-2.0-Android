@@ -105,7 +105,7 @@ fun CaptureScreen(
                     } else {
                         // Detiene captura
                         viewModel.stopCapture()
-                        Toast.makeText(context, "Captura detenida", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Captura cancelada", Toast.LENGTH_SHORT).show()
                     }
                 },
                 isValidDuration = isValidDuration,

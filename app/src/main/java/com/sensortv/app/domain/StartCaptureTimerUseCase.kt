@@ -21,7 +21,7 @@ class StartCaptureTimerUseCase {
     operator fun invoke(durationMinutes: Int): Flow<Int> = flow {
         var remainingSeconds = durationMinutes * 60
 
-        while(remainingSeconds > 0) {
+        while(remainingSeconds >= 0) {
             emit(remainingSeconds)
             delay(1000)
             remainingSeconds --
