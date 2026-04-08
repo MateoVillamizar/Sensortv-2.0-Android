@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.combine
  *
  * @param sensorRepository Fuente de datos de los sensores (Contiene corriente nominal).
  * @param batteryRepository Fuente de datos de la batería (Contiene voltaje actual).
+ * return [Flow] de [SensorData] donde cada objeto contiene el cálculo de [estimatedPowerMw].
  */
 class ObserveSensorPowerUseCase(
     private val sensorRepository: SensorRepository,

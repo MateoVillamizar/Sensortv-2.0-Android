@@ -50,7 +50,6 @@ fun CaptureScreen(
     navController: NavHostController
 ) {
 
-    // Estado simulado de captura
     var duration by remember { mutableStateOf("") }
     var samplingFrequency by remember { mutableIntStateOf(3) }
 
@@ -101,7 +100,7 @@ fun CaptureScreen(
                         }
 
                         // Inicia captura
-                        viewModel.startCapture(duration.toInt())
+                        viewModel.startCapture(duration.toInt(), samplingFrequency)
 
                     } else {
                         // Detiene captura
@@ -256,7 +255,7 @@ fun CaptureControls(
         )
     }
 
-    if (remainingTime == 0) {
+    if (remainingTime == 0 && isCapturing) {
         Toast.makeText(LocalContext.current, "Captura finalizada", Toast.LENGTH_SHORT).show()
     }
 }

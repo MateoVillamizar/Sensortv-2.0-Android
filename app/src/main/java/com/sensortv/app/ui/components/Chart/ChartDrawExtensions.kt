@@ -33,7 +33,7 @@ fun DrawScope.drawGridY(
     val roundedMaxY = (ceil(maxY / stepY)) * stepY
     var currentY = 0f
 
-    while (currentY <= roundedMaxY) {
+    while (currentY < roundedMaxY) {
 
         val y = chartScale.toY(currentY)
 
@@ -162,7 +162,15 @@ fun DrawScope.drawSensorLines(
 
                 drawCircle(color, 6f, Offset(x, y))
 
-                if (visiblePoints.size < 15) { // Dibuja el valor de cada punto cerca del círculo si hay pocos puntos (para no saturar el gráfico).
+                // Dibuja texto del punto solo si hay suficiente espacio horizontal (en píxeles) respecto al punto anterior.
+                val shouldDrawTextPoint = if (index == 0) {
+                    true
+                } else {
+                    val previousX = chartScale.toX(visiblePoints[index - 1].timeStamp)
+                    (x - previousX) > 50f
+                }
+
+                if (shouldDrawTextPoint) {
                     drawContext.canvas.nativeCanvas.drawText(
                         "%.2f".format(point.powerMw),
                         x,

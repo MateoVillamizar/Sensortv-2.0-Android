@@ -7,6 +7,7 @@ import com.sensortv.app.data.datasource.AndroidBatteryDataSource
 import com.sensortv.app.data.datasource.AndroidSensorDataSource
 import com.sensortv.app.data.repository.BatteryRepositoryImpl
 import com.sensortv.app.data.repository.SensorRepositoryImpl
+import com.sensortv.app.domain.CalculateEnergyUseCase
 import com.sensortv.app.domain.ObserveSensorPowerUseCase
 import com.sensortv.app.domain.StartCaptureTimerUseCase
 
@@ -39,8 +40,14 @@ class SensorViewModelFactory(
 
             val observeSensorPowerUseCase = ObserveSensorPowerUseCase(sensorRepo, batteryRepo)
             val startCaptureTimerUseCase = StartCaptureTimerUseCase()
+            val calculateEnergyUseCase = CalculateEnergyUseCase()
 
-            return SensorViewModel(observeSensorPowerUseCase,startCaptureTimerUseCase, batteryRepo) as T
+            return SensorViewModel(
+                observeSensorPowerUseCase,
+                startCaptureTimerUseCase,
+                calculateEnergyUseCase,
+                batteryRepo
+            ) as T
         }
         throw IllegalArgumentException("Error: Clase ViewModel no compatible con esta Factory")
     }

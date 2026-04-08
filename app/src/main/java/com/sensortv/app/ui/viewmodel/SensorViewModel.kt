@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.sensortv.app.data.model.BatteryData
 import com.sensortv.app.data.model.SensorData
 import com.sensortv.app.data.repository.BatteryRepository
+import com.sensortv.app.domain.CalculateEnergyUseCase
 import com.sensortv.app.domain.ObserveSensorPowerUseCase
 import com.sensortv.app.domain.StartCaptureTimerUseCase
 import com.sensortv.app.ui.model.SensorChartData
@@ -16,19 +17,20 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-// Pendiente AJUSTAR DOCUMENTACIÓN LUEGO DE QUE IMPLEMENTACIÓN DE DOMAIN LAYER
 /**
  * ViewModel encargado de gestionar la lógica de presentación y estado de SensorTV 2.0.
- * - Se encarga de transformar los flujos de datos crudos (repositorio) en estados
- * observables por la UI.
- * - Controla el inicio/fin de la monitorización y los tiempos de captura de datos.
+ * - Transforma flujos de datos de dominio en estados observables por Jetpack Compose.
+ * - Coordina la visualización de gráficas y el estado de la captura de datos.
  *
- * @param  observeSensorPowerUseCase Caso de uso para calcular la potencia en tiempo real.
- * @param  batteryRepository Repositorio de datos del estado de la batería.
+ * @param observeSensorPowerUseCase Caso de uso para calcular la potencia en tiempo real (P = V * I).
+ * @param startCaptureTimerUseCase Caso de uso que gestiona la cuenta regresiva de captura.
+ * @param calculateEnergyUseCase Caso de uso para calcular el incremento de energía por un sensor.
+ * @param batteryRepository Repositorio para observar cambios en el estado de la batería.
  */
 class SensorViewModel(
     private val observeSensorPowerUseCase: ObserveSensorPowerUseCase,
     private val startCaptureTimerUseCase: StartCaptureTimerUseCase,
+    private val calculateEnergyUseCase: CalculateEnergyUseCase,
     private val batteryRepository: BatteryRepository
 ): ViewModel() {
 
@@ -51,7 +53,7 @@ class SensorViewModel(
     private var lastChartUpdate: Long = 0
 
     private var startTime: Long = 0
-    private var remainingSeconds: Int = 0
+    private var lastEnergyUpdate: Long = 0
 
     // Variables de captura de datos
     private val _isCapturing = MutableStateFlow(false)
@@ -59,6 +61,8 @@ class SensorViewModel(
 
     private val _remainingTime = MutableStateFlow(0)
     val remainingTime: StateFlow<Int> = _remainingTime
+    private var userSamplingFrequency: Int = 3
+    private val sensorEnergyMap = mutableMapOf<Int, Float>() // sensorType, Joules acumulados
 
     // Referencias a las tareas en ejecución (Corrutinas)
     private var captureJob: Job? = null
@@ -84,9 +88,9 @@ class SensorViewModel(
 
     /**
      * Inicia la recolección del flujo de datos de los sensores y coordina las actualizaciones de UI.
+
      * - Actualiza la lista de sensores en cada emisión para mantener valores instantáneos.
-     * - Sincroniza la actualización de la gráfica cada 3 segundos para optimizar el
-     * rendimiento y reducir el consumo de recursos.
+     * - Sincroniza la actualización de la gráfica para optimizar el rendimiento
      */
     @OptIn(FlowPreview::class)
     private suspend fun observeSensors() {
@@ -96,9 +100,20 @@ class SensorViewModel(
 
             // Lógica de control para la gráfica (optimización)
             val currentTime = System.currentTimeMillis()
-            if (currentTime - lastChartUpdate >= 3000) {
+            if (currentTime - lastChartUpdate >= (userSamplingFrequency * 1000)) {
                 updateChartData(_sensorList.value)
                 lastChartUpdate = currentTime
+            }
+
+            //Lógica para el cálculo de energía en Joules
+            // Si se está capturando y se pasó el intervalo elegido
+            if (_isCapturing.value && (currentTime - lastEnergyUpdate >= (userSamplingFrequency * 1000))) {
+                updateSensorEnergy(
+                    sensorType = newData.type,
+                    estimatedPowerMw = newData.estimatedPowerMw,
+                    samplingFrequency = userSamplingFrequency
+                )
+                lastEnergyUpdate = currentTime
             }
         }
     }
@@ -177,6 +192,25 @@ class SensorViewModel(
     }
 
     /**
+     * Calcula y acumula la energía consumida por un sensor específico durante la captura.
+     * Utiliza la relación física E = P * t, donde la potencia se integra sobre el intervalo
+     * de muestreo seleccionado por el usuario.
+     *
+     * @param sensorType Identificador del sensor (ej. Sensor.TYPE_ACCELEROMETER).
+     * @param estimatedPowerMw Potencia actual calculada en miliwatts (mW).
+     * @param samplingFrequency Intervalo de tiempo en segundos (1s, 3s, o 5s).
+     */
+    private fun updateSensorEnergy(sensorType: Int, estimatedPowerMw: Float, samplingFrequency: Int) {
+        // Solo se acumula si el usuario ha iniciado una sesión de captura
+        if(_isCapturing.value) {
+            val currentEnergy = sensorEnergyMap[sensorType] ?: 0f
+            val energyIncrement = calculateEnergyUseCase(estimatedPowerMw, samplingFrequency)
+
+            sensorEnergyMap[sensorType] = currentEnergy + energyIncrement
+        }
+    }
+
+    /**
      * Inicia el monitoreo de sensores del dispositivo. Activa el flujo de recolección de
      * datos de los sensores utilizando corrutinas dentro del [viewModelScope].
      *
@@ -215,7 +249,9 @@ class SensorViewModel(
 
         _sensorList.value = emptyList()
         _sensorChartData.value = emptyList()
+        sensorEnergyMap.clear()
         lastChartUpdate = 0
+        lastEnergyUpdate = 0
         startTime = System.currentTimeMillis()
 
         monitoringJob = viewModelScope.launch {
@@ -229,10 +265,12 @@ class SensorViewModel(
      * - Activa el estado de captura [_isCapturing] para la UI.
      * - Delega la gestión del tiempo al [startCaptureTimerUseCase].
      *
-     * @param durationMinutes Duración total de la captura.
+     * @param durationMinutes Duración total de la captura en minutos.
+     * @param samplingFrequency Frecuencia de muestreo seleccionada por el usuario (1s, 3s, 5s).
      */
-    fun startCapture(durationMinutes: Int) {
+    fun startCapture(durationMinutes: Int, samplingFrequency: Int) {
         restartMonitoring()
+        this.userSamplingFrequency = samplingFrequency
         _isCapturing.value = true
 
         captureJob?.cancel() // Control de seguridad que cancela cualquier captura previa
@@ -244,17 +282,18 @@ class SensorViewModel(
 
                 if (remainingSeconds == 0) stopCapture()
             }
-
         }
     }
 
     /**
-     * Detiene manualmente el proceso de captura y Cancela la suscripción
+     * Detiene el proceso de captura y Cancela la suscripción
      * al temporizador.
      */
     fun stopCapture() {
         captureJob?.cancel()
         _isCapturing.value = false
         _remainingTime.value = 0
+        this.userSamplingFrequency = 3
+        restartMonitoring()
     }
 }

@@ -171,9 +171,6 @@ private fun GeneralInfoCard(
             Text("Sensores disponibles: $sensorsAvailable",
                 style = MaterialTheme.typography.bodyLarge,
             )
-            Text("Promedio total (PENDIENTE): $averagePower mW",
-                style = MaterialTheme.typography.bodyLarge,
-            )
         }
     }
 }
