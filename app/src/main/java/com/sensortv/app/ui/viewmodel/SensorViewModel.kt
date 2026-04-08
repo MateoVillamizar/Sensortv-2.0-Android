@@ -4,9 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sensortv.app.data.model.BatteryData
 import com.sensortv.app.data.model.SensorData
+import com.sensortv.app.data.model.SensorResult
 import com.sensortv.app.data.repository.BatteryRepository
 import com.sensortv.app.domain.CalculateEnergyUseCase
 import com.sensortv.app.domain.ObserveSensorPowerUseCase
+import com.sensortv.app.domain.SaveCaptureUseCase
 import com.sensortv.app.domain.StartCaptureTimerUseCase
 import com.sensortv.app.ui.model.SensorChartData
 import com.sensortv.app.ui.model.SensorChartPoint
@@ -31,6 +33,7 @@ class SensorViewModel(
     private val observeSensorPowerUseCase: ObserveSensorPowerUseCase,
     private val startCaptureTimerUseCase: StartCaptureTimerUseCase,
     private val calculateEnergyUseCase: CalculateEnergyUseCase,
+    private val saveCaptureUseCase: SaveCaptureUseCase,
     private val batteryRepository: BatteryRepository
 ): ViewModel() {
 
@@ -211,6 +214,26 @@ class SensorViewModel(
     }
 
     /**
+     * Transforma el estado actual de los sensores y la energía acumulada en una lista
+     * de resultados lista para ser persistida.
+     *
+     * @return Lista de [SensorResult] con los datos consolidados de la sesión.
+     */
+    private fun prepareSensorResults(): List<SensorResult> {
+        val currentTimestamp = java.time.Instant.now().toString()
+
+        return _sensorList.value.map { sensor ->
+            SensorResult(
+                sensorType = sensor.type,
+                displayName = sensor.displayName,
+                estimatedPowerMw = sensor.estimatedPowerMw,
+                totalEnergyJ = sensorEnergyMap[sensor.type] ?: 0f,
+                timestamp = currentTimestamp
+            )
+        }
+    }
+
+    /**
      * Inicia el monitoreo de sensores del dispositivo. Activa el flujo de recolección de
      * datos de los sensores utilizando corrutinas dentro del [viewModelScope].
      *
@@ -286,14 +309,35 @@ class SensorViewModel(
     }
 
     /**
-     * Detiene el proceso de captura y Cancela la suscripción
-     * al temporizador.
+     * Detiene el proceso de captura y Cancela la suscripción al temporizador.
+     *
+     * Persiste los datos recolectados, genera un timestamp único para la sesión
+     * y lanza la lógica de guardado en dominio.
      */
     fun stopCapture() {
-        captureJob?.cancel()
+        if(_isCapturing.value) return // Evitar ejecuciones duplicadas
+        val timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"))
+
+        val results = prepareSensorResults()
+        val duration = (_remainingTime.value / 60) // Duración original
+
+        viewModelScope.launch {
+            saveCaptureUseCase(
+                timestamp = timestamp,
+                durationMinutes = duration,
+                samplingFrequency = userSamplingFrequency,
+                sensorResults = results
+            )
+        }
+
+        // Limpieza de estados tras el guardado
         _isCapturing.value = false
         _remainingTime.value = 0
+        sensorEnergyMap.clear()
+        captureJob?.cancel()
+
         this.userSamplingFrequency = 3
         restartMonitoring()
+
     }
 }

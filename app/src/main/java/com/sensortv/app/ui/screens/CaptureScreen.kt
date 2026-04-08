@@ -18,6 +18,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -58,6 +59,13 @@ fun CaptureScreen(
 
     val isCapturing by viewModel.isCapturing.collectAsStateWithLifecycle()
     val remainingTime by viewModel.remainingTime.collectAsStateWithLifecycle()
+
+    // Este bloque se ejecuta solo cuando isCapturing pasa de true a false Y el tiempo es 0
+    LaunchedEffect(isCapturing) {
+        if (!isCapturing && remainingTime == 0 && duration.isNotEmpty()) {
+            Toast.makeText(context, "Captura guardada exitosamente", Toast.LENGTH_LONG).show()
+        }
+    }
 
     Scaffold(
         topBar = { StandardTopBar("Captura de Datos") }
@@ -242,7 +250,7 @@ fun CaptureControls(
         )
 
         AppButton(
-            text = if (isCapturing) "Detener Captura" else "Iniciar Captura",
+            text = if (isCapturing) "Finalizar Captura" else "Iniciar Captura",
             onClick = onToggleCapture,
             isPrimary = !isCapturing,
             enabled = isCapturing || isValidDuration
@@ -254,8 +262,8 @@ fun CaptureControls(
             isPrimary = true,
         )
     }
-
-    if (remainingTime == 0 && isCapturing) {
-        Toast.makeText(LocalContext.current, "Captura finalizada", Toast.LENGTH_SHORT).show()
-    }
+//
+//    if (remainingTime == 0 && isCapturing) {
+//        Toast.makeText(LocalContext.current, "Captura finalizada", Toast.LENGTH_SHORT).show()
+//    }
 }

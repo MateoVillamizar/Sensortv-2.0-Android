@@ -36,30 +36,28 @@ class SensorViewModelFactory(
         // Se verifica que se esté solicitando el ViewModel (SensorViewModel) correcto
         if (modelClass.isAssignableFrom(SensorViewModel::class.java)) {
 
-            // Construcción de dependencias (Base de Datos)
+            // Construcción de dependencias
             val db = Room.databaseBuilder(context, AppDatabase::class.java, "sensor_tv_2.0_db").build()
             val captureDao = db.captureDao()
 
-            val captureRepo = CaptureRepositoryImpl(captureDao)
-            val csvDataSource = AndroidCsvDataSource(context)
-
-            val saveCaptureUseCase = SaveCaptureUseCase(csvDataSource, captureRepo)
-
-            // Construcción de dependencias
             val sensorDataSource = AndroidSensorDataSource(context)
             val batteryDataSource = AndroidBatteryDataSource(context)
+            val csvDataSource = AndroidCsvDataSource(context)
 
             val sensorRepo = SensorRepositoryImpl(sensorDataSource)
             val batteryRepo = BatteryRepositoryImpl(batteryDataSource)
+            val captureRepo = CaptureRepositoryImpl(captureDao)
 
             val observeSensorPowerUseCase = ObserveSensorPowerUseCase(sensorRepo, batteryRepo)
             val startCaptureTimerUseCase = StartCaptureTimerUseCase()
             val calculateEnergyUseCase = CalculateEnergyUseCase()
+            val saveCaptureUseCase = SaveCaptureUseCase(csvDataSource, captureRepo)
 
             return SensorViewModel(
                 observeSensorPowerUseCase,
                 startCaptureTimerUseCase,
                 calculateEnergyUseCase,
+                saveCaptureUseCase,
                 batteryRepo
             ) as T
         }
