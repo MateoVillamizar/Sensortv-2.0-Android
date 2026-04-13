@@ -15,5 +15,5 @@ data class CaptureRecordEntity (
     val durationMinutes: Int,
     val samplingFrequencySeconds: Int,
     val dateMillis: Long,       // Fecha en milisegundos para ordenar fácilmente
-    val filePath: String        // Ruta absoluta del archivo CSV
+    val filePath: String,        // Ruta absoluta del archivo .csv
 )

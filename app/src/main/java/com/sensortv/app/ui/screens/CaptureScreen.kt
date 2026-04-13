@@ -52,20 +52,13 @@ fun CaptureScreen(
 ) {
 
     var duration by remember { mutableStateOf("") }
-    var samplingFrequency by remember { mutableIntStateOf(3) }
+    var samplingFrequency by remember { mutableIntStateOf(1) }
 
     val isValidDuration = duration.isNotEmpty() && duration.toIntOrNull() != null && duration.toInt() > 0
     val context = LocalContext.current
 
     val isCapturing by viewModel.isCapturing.collectAsStateWithLifecycle()
     val remainingTime by viewModel.remainingTime.collectAsStateWithLifecycle()
-
-    // Este bloque se ejecuta solo cuando isCapturing pasa de true a false Y el tiempo es 0
-    LaunchedEffect(isCapturing) {
-        if (!isCapturing && duration.isNotEmpty()) {
-            Toast.makeText(context, "Captura guardada exitosamente", Toast.LENGTH_LONG).show()
-        }
-    }
 
     Scaffold(
         topBar = { StandardTopBar("Captura de Datos") }
@@ -112,7 +105,7 @@ fun CaptureScreen(
 
                     } else {
                         // Detiene captura
-                        viewModel.stopCapture()
+                        viewModel.cancelCapture()
                     }
                 },
                 isValidDuration = isValidDuration,
@@ -249,7 +242,7 @@ fun CaptureControls(
         )
 
         AppButton(
-            text = if (isCapturing) "Finalizar Captura" else "Iniciar Captura",
+            text = if (isCapturing) "Cancelar Captura" else "Iniciar Captura",
             onClick = onToggleCapture,
             isPrimary = !isCapturing,
             enabled = isCapturing || isValidDuration

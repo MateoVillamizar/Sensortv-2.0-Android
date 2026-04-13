@@ -17,13 +17,14 @@ class DeleteCaptureUseCase(
 ) {
     /**
      * Ejecuta la eliminación sincronizada.
-     * 1. Borra el archivo físico del almacenamiento externo.
+     * 1. Borra el archivo físico (CSV) del almacenamiento externo (almacenamiento interno del dispositivo).
      * 2. Borra el registro de la base de datos Room.
      *
      * @param record Entidad que contiene la ruta del archivo y el ID en la BD.
      */
     suspend operator fun invoke(record: CaptureRecordEntity) {
         csvDataSource.deleteCsvFile(record.filePath)
+
         captureRepository.deleteRecord(record)
     }
 }

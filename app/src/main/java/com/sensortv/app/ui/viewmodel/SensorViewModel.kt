@@ -72,6 +72,10 @@ class SensorViewModel(
     private var captureJob: Job? = null
     private var monitoringJob: Job? = null
 
+    // otros estados ...
+    private var originalDurationMinutes: Int = 0     // Para no perder la duración ingresada al iniciar captura
+    private val capturedLines = mutableListOf<String>() // Historial de filas para el CSV
+
     init {
         startMonitoring()
         observeBattery()
@@ -295,14 +299,25 @@ class SensorViewModel(
     fun startCapture(durationMinutes: Int, samplingFrequency: Int) {
         restartMonitoring()
         this.userSamplingFrequency = samplingFrequency
+        this.originalDurationMinutes = durationMinutes
         _isCapturing.value = true
+        capturedLines.clear()
 
         captureJob?.cancel() // Control de seguridad que cancela cualquier captura previa
+
 
         // Recolectar el flujo del temporizador desde el dominio
         captureJob = viewModelScope.launch {
             startCaptureTimerUseCase(durationMinutes).collect { remainingSeconds ->
                 _remainingTime.value = remainingSeconds
+
+                // Cada intervalo se guarda una fila en la lista temporal
+                if (remainingSeconds % samplingFrequency == 0 && remainingSeconds != (durationMinutes * 60)) {
+                    val timeTag = java.time.Instant.now().toString()
+                    _sensorList.value.forEach { sensor ->
+                        capturedLines.add("$timeTag,${sensor.displayName},${sensor.estimatedPowerMw}")
+                    }
+                }
 
                 if (remainingSeconds == 0) stopCapture()
             }
@@ -321,7 +336,7 @@ class SensorViewModel(
             .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"))
 
         val results = prepareSensorResults()
-        val duration = (_remainingTime.value / 60) // Duración original
+        val duration = (originalDurationMinutes) // Duración original en minutos
 
         viewModelScope.launch {
             try {
@@ -329,6 +344,7 @@ class SensorViewModel(
                     timestamp = timestamp,
                     durationMinutes = duration,
                     samplingFrequency = userSamplingFrequency,
+                    allMeasurements = capturedLines,
                     sensorResults = results
                 )
             } catch (e: Exception) {
@@ -340,11 +356,36 @@ class SensorViewModel(
                 _remainingTime.value = 0
                 sensorEnergyMap.clear()
                 captureJob?.cancel()
+                capturedLines.clear()
 
                 // Reiniciar monitoreo normal
                 userSamplingFrequency = 3
                 restartMonitoring()
             }
+        }
+    }
+
+    /**
+     * Cancela el proceso de captura de datos en curso sin persistir información.
+     *
+     * - Verifica si existe una sesión de captura activa para evitar ejecuciones innecesarias.
+     * - Restablece los estados relacionados con la captura (_isCapturing y _remainingTime).
+     * - Cancela la corrutina asociada al temporizador para detener la cuenta regresiva.
+     * - Limpia los datos temporales acumulados (energía y líneas capturadas).
+     * - Reinicia la configuración predeterminada de muestreo y el monitoreo de sensores.
+     */
+    fun cancelCapture() {
+        if(_isCapturing.value) {
+            _isCapturing.value = false
+            _remainingTime.value = 0
+            originalDurationMinutes = 0
+            sensorEnergyMap.clear()
+            captureJob?.cancel()
+            capturedLines.clear()
+
+            // Reiniciar monitoreo normal
+            userSamplingFrequency = 3
+            restartMonitoring()
         }
     }
 }

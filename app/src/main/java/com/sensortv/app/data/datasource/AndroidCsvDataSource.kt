@@ -26,23 +26,29 @@ class AndroidCsvDataSource(
      */
     override suspend fun writeCsv(fileName: String, content: List<String>): File = withContext(
         Dispatchers.IO) {
-        // Ruta de carpeta propia: /Android/storage/emulated/0/Android/data/com.sensortv.app/files/captures/
         // context.getExternalFilesDir(null) apunta a: /Android/storage/emulated/0/Android/data/com.sensortv.app/files/
         val directory = File(context.getExternalFilesDir(null), "captures")
 
-        if (!directory.exists()) {
-            directory.mkdirs()
-        }
+        if (!directory.exists()) directory.mkdirs()
 
         //Crear la referencia al archivo dentro de la carpeta
         val file = File(directory, fileName)
 
         Log.e("CSV_PATH", "Archivo guardado en: ${file.absolutePath}")
 
-        // Escribir el contenido usando un bufferedWriter que abre un canal de escritura eficiente
-        file.bufferedWriter().use { writer ->
+        /**
+         * Escribe el contenido en el archivo usando UTF-8 (Charsets.UTF_8 explícitamente).
+         * Cada línea se normaliza (sin acentos y en mayúsculas).
+         * El bloque `use` asegura que el writer se cierre automáticamente.
+         */
+        file.outputStream().bufferedWriter(Charsets.UTF_8).use { writer ->
             content.forEach { line ->
-                writer.write(line)
+                val normalizedLine = java.text.Normalizer
+                    .normalize(line, java.text.Normalizer.Form.NFD) // descompone caracteres acentuados de línea
+                    .replace("\\p{Mn}+".toRegex(), "")  // \p{Mn} ->  marcas diacríticas (acentos, tildes, etc.)
+                    .uppercase()
+
+                writer.write(normalizedLine)
                 writer.newLine()
             }
         }

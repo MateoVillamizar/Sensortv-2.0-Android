@@ -25,38 +25,47 @@ class SaveCaptureUseCase(
      * @param timestamp Identificador de tiempo para el nombre del archivo (formato YYYY-MM-DD...).
      * @param durationMinutes Duración total que tuvo la captura en minutos.
      * @param samplingFrequency Frecuencia en segundos utilizada (1, 3 o 5s).
-     * @param sensorResults Lista de resultados procesados de cada sensor.
+     * @param allMeasurements Lista de todas las filas de mediciones.csv.
+     * @param sensorResults Lista de resultados totales de cada sensor.
      */
     suspend operator fun invoke(
         timestamp: String,
         durationMinutes: Int,
         samplingFrequency: Int,
+        allMeasurements: List<String>,
         sensorResults: List<SensorResult>
     ) {
-        // Preparar contenido para mediciones.csv
-        val medicionesContent = mutableListOf<String>("timestamp,sensor,potencia_mw")
-        sensorResults.forEach {
-            medicionesContent.add("${it.timestamp},${it.displayName},${it.estimatedPowerMw}")
-        }
+        // Archivo de Mediciones (Log histórico)
+        val medicionesHeader = "timestamp,sensor,potencia_mw"
+        val medicionesContent = listOf(medicionesHeader) + allMeasurements
+        val medicionesFile = csvDataSource.writeCsv("${timestamp}_mediciones.csv", medicionesContent)
 
-        // Preparar contenido para totales.csv
-        val totalesContent = mutableListOf<String>("sensor,energia_total_j")
+        // Archivo de Totales (Resumen final)
+        val totalesContent = mutableListOf("sensor,energia_total_j")
         sensorResults.forEach {
             totalesContent.add("${it.displayName},${it.totalEnergyJ}")
         }
 
-        //Guardar archivos físicos
-        val medicionesFile = csvDataSource.writeCsv("${timestamp}_mediciones.csv", medicionesContent)
         val totalesFile = csvDataSource.writeCsv("${timestamp}_totales.csv", totalesContent)
 
-        // Guardar metadatos en Room (usamos el archivo de mediciones como referencia principal)
-        val entity = CaptureRecordEntity(
+        // Persistencia en Room (registros - metadatos de CSV)
+        val medicionesEntity = CaptureRecordEntity(
             fileName = "${timestamp}_mediciones.csv",
             durationMinutes = durationMinutes,
             samplingFrequencySeconds = samplingFrequency,
             dateMillis = System.currentTimeMillis(),
             filePath = medicionesFile.absolutePath
         )
-        captureRepository.saveRecord(entity)
+
+        val totalesEntity = CaptureRecordEntity(
+            fileName = "${timestamp}_totales.csv",
+            durationMinutes = durationMinutes,
+            samplingFrequencySeconds = samplingFrequency,
+            dateMillis = System.currentTimeMillis(),
+            filePath = totalesFile.absolutePath
+        )
+
+        captureRepository.saveRecord(medicionesEntity)
+        captureRepository.saveRecord(totalesEntity)
     }
 }
