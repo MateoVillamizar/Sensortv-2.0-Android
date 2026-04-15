@@ -5,10 +5,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.room.Room
 import com.sensortv.app.data.datasource.AndroidCsvDataSource
+import com.sensortv.app.data.datasource.AndroidFileCompressor
 import com.sensortv.app.data.datasource.AppDatabase
 import com.sensortv.app.data.model.DatabaseProvider
 import com.sensortv.app.data.repository.CaptureRepositoryImpl
 import com.sensortv.app.domain.DeleteCaptureUseCase
+import com.sensortv.app.domain.ExportAllCapturesUseCase
 import com.sensortv.app.domain.GetCaptureHistoryUseCase
 
 /**
@@ -36,11 +38,13 @@ class HistoryViewModelFactory(
 
             val captureRepo = CaptureRepositoryImpl(captureDao)
             val csvDataSource = AndroidCsvDataSource(context)
+            val fileCompressor = AndroidFileCompressor(context)
 
             val getCaptureHistoryUseCase = GetCaptureHistoryUseCase(captureRepo)
             val deleteCaptureUseCase = DeleteCaptureUseCase(csvDataSource, captureRepo)
+            val exportAllCapturesUseCase = ExportAllCapturesUseCase(fileCompressor)
 
-            return HistoryViewModel(getCaptureHistoryUseCase, deleteCaptureUseCase) as T
+            return HistoryViewModel(getCaptureHistoryUseCase, deleteCaptureUseCase, exportAllCapturesUseCase) as T
         }
         throw IllegalArgumentException("Error: Clase ViewModel no compatible con esta Factory")
     }

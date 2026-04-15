@@ -26,7 +26,7 @@ import com.sensortv.app.ui.viewmodel.HistoryViewModelFactory
 @Composable
 fun AppNavHost(navController: NavHostController) {
 
-    // Obtenemos el contexto de Android para la fábrica y creamos viewmModels
+    // Obtener el contexto de Android para la fábrica y creamos viewmModels
     val context = LocalContext.current
     val sensorViewModel: SensorViewModel = viewModel(
         factory = SensorViewModelFactory(context)

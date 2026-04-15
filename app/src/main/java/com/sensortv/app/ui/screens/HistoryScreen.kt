@@ -1,5 +1,6 @@
 package com.sensortv.app.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -26,6 +28,9 @@ import androidx.navigation.NavHostController
 import com.sensortv.app.data.model.CaptureRecordEntity
 import com.sensortv.app.ui.components.AppButton
 import com.sensortv.app.ui.components.StandardTopBar
+import com.sensortv.app.ui.utils.shareCsvFile
+import com.sensortv.app.ui.utils.shareZip
+import com.sensortv.app.ui.utils.viewCsvFile
 import com.sensortv.app.ui.viewmodel.HistoryViewModel
 
 /**
@@ -41,8 +46,8 @@ fun HistoryScreen(
     viewModel: HistoryViewModel,
     navController: NavHostController
 ) {
-    // Convertir el StateFlow en un Estado de Compose
-    val records by viewModel.historyRecords.collectAsStateWithLifecycle()
+    val records by viewModel.historyRecords.collectAsStateWithLifecycle()   // Convertir el StateFlow en un Estado de Compose
+    val context = LocalContext.current
 
     Scaffold(
         topBar = { StandardTopBar("Historial de Registros") }
@@ -59,8 +64,8 @@ fun HistoryScreen(
                 HistoryRecordCard(
                     record = record,
                     onDelete = { viewModel.deleteRecord(record) },
-                    onShare = { /* Futura acción al exportar */ },
-                    onView = { /* Futura acción al ver */ }
+                    onShare = { shareCsvFile(context, record.filePath) },
+                    onView = { viewCsvFile(context, record.filePath) }
                 )
             }
 
@@ -87,6 +92,23 @@ fun HistoryScreen(
                 AppButton(
                     text = "Volver",
                     onClick = { navController.popBackStack() },
+                )
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(24.dp))
+                AppButton(
+                    text = "Exportar Todos",
+                    onClick = {
+                        viewModel.exportAll { zipFile -> // Recibe el resultado de exportAll cuando este finaliza (zip o null)
+                            zipFile?.let { file ->
+                                shareZip(context, file)
+                            } ?: run {
+                                Toast.makeText(context, "No hay archivos para exportar", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    },
+                    isPrimary = true
                 )
             }
         }
@@ -151,7 +173,7 @@ fun HistoryRecordCard(
                     AppButton(text = "Ver", onClick = onView, isPrimary = true)
                 }
                 Box(modifier = Modifier.weight(1f)) {
-                    AppButton(text = "Compartir", onClick = onShare, isPrimary = true)
+                    AppButton(text = "Exportar", onClick = onShare, isPrimary = true)
                 }
                 // Botón de eliminar (puedes usar un IconButton si prefieres)
                 Box(modifier = Modifier.weight(0.5f)) {

@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.callbackFlow
 
 /**
  * Implementación concreta de [SensorDataSource] que interactúa con el hardware a través del [SensorManager].
- * * Convierte las lecturas de los sensores del sistema en un flujo [Flow] asíncrono,
+ * - Convierte las lecturas de los sensores del sistema en un flujo [Flow] asíncrono,
  * gestionando el ciclo de vida del hardware para evitar consumo innecesario de energía.
  *
  * @param context Contexto necesario para obtener el servicio SENSOR_SERVICE.
