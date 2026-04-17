@@ -1,5 +1,6 @@
 package com.sensortv.app.ui.viewmodel
 
+import android.hardware.Sensor
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -227,6 +228,7 @@ class SensorViewModel(
                 displayName = sensor.displayName,
                 estimatedPowerMw = sensor.estimatedPowerMw,
                 totalEnergyJ = sensorEnergyMap[sensor.type] ?: 0f,
+                totalEnergymJ = (sensorEnergyMap[sensor.type]?: 0f) * 1000, // mJ = J * 1000
                 timestamp = currentTimestamp
             )
         }
@@ -285,8 +287,9 @@ class SensorViewModel(
      * - Reinicia el monitoreo para sincronizar datos.
      * - Activa el estado de captura [_isCapturing] para la UI.
      * - Delega la gestión del tiempo al [startCaptureTimerUseCase].
+     * - En cada intervalo de muestreo (Δt), se registra una fila en formato tabular (wide format)
      * - la energía se calcula en los mismos intervalos definidos por la frecuencia de muestreo,
-     * utilizando el último valor disponible de potencia de cada sensor.
+     * como la suma de (P * Δt) para cada sensor.
      *
      * @param durationMinutes Duración total de la captura en minutos.
      * @param samplingFrequency Frecuencia de muestreo seleccionada por el usuario (1s, 3s, 5s).
@@ -310,11 +313,30 @@ class SensorViewModel(
                 if (remainingSeconds % samplingFrequency == 0 && remainingSeconds != (durationMinutes * 60)) {
                     val timeTag = java.time.Instant.now().toString()
 
-                    _sensorList.value.forEach { sensor ->
-                        // Guardado en CSV
-                        capturedLines.add("$timeTag,${sensor.displayName},${sensor.estimatedPowerMw}")
+                    val sensorsMap = _sensorList.value.associateBy { it.type }
 
-                        // Nuevo cálculo de energía
+                    val luminosidad = sensorsMap[Sensor.TYPE_LIGHT]?.estimatedPowerMw ?: 0f
+                    val proximidad = sensorsMap[Sensor.TYPE_PROXIMITY]?.estimatedPowerMw ?: 0f
+                    val acelerometro = sensorsMap[Sensor.TYPE_ACCELEROMETER]?.estimatedPowerMw ?: 0f
+                    val magnetometro = sensorsMap[Sensor.TYPE_MAGNETIC_FIELD]?.estimatedPowerMw ?: 0f
+                    val giroscopio = sensorsMap[Sensor.TYPE_GYROSCOPE]?.estimatedPowerMw ?: 0f
+
+                    val row = String.format(
+                        // Locale.US asegura punto decimal (.) en floats y evita conflictos con el separador CSV (,)
+                        java.util.Locale.US,
+                        "%s,%d,%.7f,%.7f,%.7f,%.7f,%.7f",
+                        timeTag,
+                        samplingFrequency,
+                        luminosidad,
+                        proximidad,
+                        acelerometro,
+                        magnetometro,
+                        giroscopio
+                    )
+
+                    capturedLines.add(row)
+
+                    _sensorList.value.forEach { sensor ->
                         updateSensorEnergy(
                             sensorType = sensor.type,
                             estimatedPowerMw = sensor.estimatedPowerMw,
@@ -352,7 +374,6 @@ class SensorViewModel(
                     sensorResults = results
                 )
             } catch (e: Exception) {
-                // Loguear error si algo falla en el guardado
                 Log.e("CaptureViewModel", "Error al guardar captura", e)
             } finally {
                 // Limpieza de estados tras el guardado
@@ -388,7 +409,7 @@ class SensorViewModel(
             capturedLines.clear()
 
             // Reiniciar monitoreo normal
-            userSamplingFrequency = 3
+            userSamplingFrequency = 1
             restartMonitoring()
         }
     }

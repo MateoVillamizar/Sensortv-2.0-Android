@@ -12,7 +12,6 @@ package com.sensortv.app.data.model
  * @property nominalConsumptionmA Corriente teórica fija consumida por el sensor en mA. (miliamperios).
  * @property estimatedPowerMw Potencia estimada del sensor en miliwatts (mW)
  * calculada como Voltaje Batería * nominalConsumptionmA.
- * @property totalEnergyJ Consumo acumulado estimado del sensor expresado en Joules (J).
  */
 data class SensorData(
     val type: Int,
@@ -25,5 +24,4 @@ data class SensorData(
     val isAvailable: Boolean = false,
     val nominalConsumptionmA: Float = 0f,
     val estimatedPowerMw: Float = 0f,
-    val totalEnergyJ: Float = 0f
 )

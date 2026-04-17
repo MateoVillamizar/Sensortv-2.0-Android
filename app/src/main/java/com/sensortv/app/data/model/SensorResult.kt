@@ -8,6 +8,7 @@ package com.sensortv.app.data.model
  * @property displayName Nombre legible del sensor para el usuario (ej. "Acelerómetro").
  * @property estimatedPowerMw Potencia estimada del sensor en miliwatts (mW) mediante la relación P = V * I.
  * @property totalEnergyJ Consumo acumulado estimado del sensor expresado en Joules (J).
+ * @property totalEnergymJ Consumo acumulado estimado del sensor expresado en milijoules (mJ).
  * @property timestamp Marca de tiempo en formato ISO 8601 (UTC).
  */
 data class SensorResult(
@@ -15,5 +16,6 @@ data class SensorResult(
     val displayName: String,
     val estimatedPowerMw: Float,
     val totalEnergyJ: Float,
+    val totalEnergymJ: Float,
     val timestamp: String
 )

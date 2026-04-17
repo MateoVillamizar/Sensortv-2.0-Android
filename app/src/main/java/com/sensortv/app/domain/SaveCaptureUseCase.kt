@@ -19,8 +19,12 @@ class SaveCaptureUseCase(
     private val captureRepository: CaptureRepository
 ) {
     /**
-     * Ejecuta el proceso de guardado integral: genera los strings del CSV,
-     * escribe los archivos en disco y guarda la referencia en la base de datos local.
+     * Ejecuta el proceso de guardado integral: genera los datos en formato CSV estructurado,
+     * escribe los archivos en disco y registra la referencia con metadatos en la base de datos local.
+     *
+     * - El archivo de mediciones utiliza un formato tabular (wide format), donde cada fila
+     * representa un instante de tiempo y contiene la potencia de todos los sensores.
+     * - El archivo de totales resume la energía acumulada por sensor en Joules (J) y milijoules (mJ).
      *
      * @param timestamp Identificador de tiempo para el nombre del archivo (formato YYYY-MM-DD...).
      * @param durationMinutes Duración total que tuvo la captura en minutos.
@@ -36,14 +40,23 @@ class SaveCaptureUseCase(
         sensorResults: List<SensorResult>
     ) {
         // Archivo de Mediciones (Log histórico)
-        val medicionesHeader = "timestamp,sensor,potencia_mw"
+        val medicionesHeader = "timestamp,latencia_sg,luminosidad_mw,proximidad_mw,acelerometro_mw,magnetometro_mw,giroscopio_mw"
         val medicionesContent = listOf(medicionesHeader) + allMeasurements
         val medicionesFile = csvDataSource.writeCsv("${timestamp}_mediciones.csv", medicionesContent)
 
         // Archivo de Totales (Resumen final)
-        val totalesContent = mutableListOf("sensor,energia_total_j")
+        val totalesContent = mutableListOf("sensor,energia_total_j,energia_total_mj")
         sensorResults.forEach {
-            totalesContent.add("${it.displayName},${it.totalEnergyJ}")
+            totalesContent.add(
+                String.format(
+                    // Locale.US asegura punto decimal (.) en floats y evita conflictos con el separador CSV (,)
+                    java.util.Locale.US,
+                    "%s,%.7f,%.7f",
+                    it.displayName,
+                    it.totalEnergyJ,
+                    it.totalEnergymJ
+                )
+            )
         }
 
         val totalesFile = csvDataSource.writeCsv("${timestamp}_totales.csv", totalesContent)
