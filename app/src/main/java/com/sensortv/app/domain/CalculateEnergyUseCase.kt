@@ -5,9 +5,9 @@ package com.sensortv.app.domain
  * Fórmula: Energía (J) = (Potencia (mW) / 1000) * Tiempo (s)
  */
 class CalculateEnergyUseCase {
-
     /**
      * Calcula el incremento de energía entre dos muestras.
+     *
      * @param estimatedPowerMw Potencia actual estimada medida en miliwatts.
      * @param intervalSeconds Tiempo transcurrido desde la última muestra (frecuencia de muestreo).
      * @return Energía consumida en ese intervalo expresada en Joules (J).

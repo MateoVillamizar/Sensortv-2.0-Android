@@ -57,7 +57,6 @@ class SensorViewModel(
     private var lastChartUpdate: Long = 0
 
     private var startTime: Long = 0
-    private var lastEnergyUpdate: Long = 0
 
     // Variables de captura de datos
     private val _isCapturing = MutableStateFlow(false)
@@ -99,6 +98,9 @@ class SensorViewModel(
 
      * - Actualiza la lista de sensores en cada emisión para mantener valores instantáneos.
      * - Sincroniza la actualización de la gráfica para optimizar el rendimiento
+     *
+     * Nota: El cálculo de energía no se realiza en este método_ para evitar depender
+     * de la frecuencia de emisión de los sensores.
      */
     @OptIn(FlowPreview::class)
     private suspend fun observeSensors() {
@@ -111,17 +113,6 @@ class SensorViewModel(
             if (currentTime - lastChartUpdate >= (userSamplingFrequency * 1000)) {
                 updateChartData(_sensorList.value)
                 lastChartUpdate = currentTime
-            }
-
-            //Lógica para el cálculo de energía en Joules
-            // Si se está capturando y se pasó el intervalo elegido
-            if (_isCapturing.value && (currentTime - lastEnergyUpdate >= (userSamplingFrequency * 1000))) {
-                updateSensorEnergy(
-                    sensorType = newData.type,
-                    estimatedPowerMw = newData.estimatedPowerMw,
-                    samplingFrequency = userSamplingFrequency
-                )
-                lastEnergyUpdate = currentTime
             }
         }
     }
@@ -201,18 +192,21 @@ class SensorViewModel(
 
     /**
      * Calcula y acumula la energía consumida por un sensor específico durante la captura.
-     * Utiliza la relación física E = P * t, donde la potencia se integra sobre el intervalo
-     * de muestreo seleccionado por el usuario.
+     * Utiliza la relación física E = P * t, integrando la potencia sobre un intervalo
+     * de muestreo definido por el usuario.
      *
      * @param sensorType Identificador del sensor (ej. Sensor.TYPE_ACCELEROMETER).
      * @param estimatedPowerMw Potencia actual calculada en miliwatts (mW).
-     * @param samplingFrequency Intervalo de tiempo en segundos (1s, 3s, o 5s).
+     * @param intervalSeconds Intervalo de tiempo en segundos utilizado para la integración (Δt).
      */
-    private fun updateSensorEnergy(sensorType: Int, estimatedPowerMw: Float, samplingFrequency: Int) {
-        // Solo se acumula si el usuario ha iniciado una sesión de captura
-        if(_isCapturing.value) {
+    private fun updateSensorEnergy(
+        sensorType: Int,
+        estimatedPowerMw: Float,
+        intervalSeconds: Int
+    ) {
+        if (_isCapturing.value) {
             val currentEnergy = sensorEnergyMap[sensorType] ?: 0f
-            val energyIncrement = calculateEnergyUseCase(estimatedPowerMw, samplingFrequency)
+            val energyIncrement = calculateEnergyUseCase(estimatedPowerMw, intervalSeconds)
 
             sensorEnergyMap[sensorType] = currentEnergy + energyIncrement
         }
@@ -279,7 +273,6 @@ class SensorViewModel(
         _sensorChartData.value = emptyList()
         sensorEnergyMap.clear()
         lastChartUpdate = 0
-        lastEnergyUpdate = 0
         startTime = System.currentTimeMillis()
 
         monitoringJob = viewModelScope.launch {
@@ -292,6 +285,8 @@ class SensorViewModel(
      * - Reinicia el monitoreo para sincronizar datos.
      * - Activa el estado de captura [_isCapturing] para la UI.
      * - Delega la gestión del tiempo al [startCaptureTimerUseCase].
+     * - la energía se calcula en los mismos intervalos definidos por la frecuencia de muestreo,
+     * utilizando el último valor disponible de potencia de cada sensor.
      *
      * @param durationMinutes Duración total de la captura en minutos.
      * @param samplingFrequency Frecuencia de muestreo seleccionada por el usuario (1s, 3s, 5s).
@@ -314,8 +309,17 @@ class SensorViewModel(
                 // Cada intervalo se guarda una fila en la lista temporal
                 if (remainingSeconds % samplingFrequency == 0 && remainingSeconds != (durationMinutes * 60)) {
                     val timeTag = java.time.Instant.now().toString()
+
                     _sensorList.value.forEach { sensor ->
+                        // Guardado en CSV
                         capturedLines.add("$timeTag,${sensor.displayName},${sensor.estimatedPowerMw}")
+
+                        // Nuevo cálculo de energía
+                        updateSensorEnergy(
+                            sensorType = sensor.type,
+                            estimatedPowerMw = sensor.estimatedPowerMw,
+                            intervalSeconds = samplingFrequency
+                        )
                     }
                 }
 
