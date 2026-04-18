@@ -11,12 +11,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -28,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -36,6 +39,7 @@ import com.sensortv.app.ui.components.AppButton
 import com.sensortv.app.ui.components.SamplingFrequencySelector
 import com.sensortv.app.ui.components.StandardTopBar
 import com.sensortv.app.ui.navigation.AppRoutes
+import com.sensortv.app.ui.utils.UiEvent
 
 /**
  * Pantalla para configurar y controlar la captura de datos de sensores.
@@ -59,6 +63,69 @@ fun CaptureScreen(
 
     val isCapturing by viewModel.isCapturing.collectAsStateWithLifecycle()
     val remainingTime by viewModel.remainingTime.collectAsStateWithLifecycle()
+
+    /** Estado para controlar la visibilidad de la alerta de cancelación */
+    var showCancelDialog by remember { mutableStateOf(false) }
+
+    var currentToast by remember { mutableStateOf<Toast?>(null) }
+    /**
+     * Colector de eventos únicos provenientes del ViewModel.
+     * [LaunchedEffect] con Unit lanza una corrutina asociada a este Composable que se
+     * inicia cuando entra en composición y se cancela cuando sale.
+     *
+     */
+
+    // Lógica del Toast - notificación
+    LaunchedEffect(Unit) {
+        viewModel.uiEvent.collect { event ->
+            when (event) {
+                is UiEvent.ShowToast -> {
+
+                    // Lógica Anti-Spam: Cancela el anterior si aún es visible
+                    currentToast?.cancel()
+                    currentToast = Toast.makeText(context, event.message, Toast.LENGTH_SHORT)
+                    currentToast?.show()
+                }
+            }
+        }
+    }
+
+    // Lógica del dialogo
+    if (showCancelDialog) {
+        AlertDialog(
+            onDismissRequest = { showCancelDialog = false },
+            title = {
+                Text(
+                    text = "¿Interrumpir captura?",
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.headlineSmall
+                )
+            },
+            text = {
+                Text(
+                    text = "Si cancelas ahora, todos los datos recolectados en esta sesión se perderán permanentemente.",
+                    textAlign = TextAlign.Justify,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.cancelCapture()
+                        showCancelDialog = false
+                        viewModel.sendUiMessage("Captura cancelada")
+                    }
+                ) {
+                    Text("Detener y descartar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showCancelDialog = false }) {
+                    Text("Continuar midiendo")
+                }
+            }
+        )
+    }
 
     Scaffold(
         topBar = { StandardTopBar("Captura de Datos") }
@@ -96,7 +163,7 @@ fun CaptureScreen(
                     if (!isCapturing) {
 
                         if(!isValidDuration) {
-                            Toast.makeText(context, "Duración no válida", Toast.LENGTH_SHORT).show()
+                            viewModel.sendUiMessage("Duración no válida")
                             return@CaptureControls
                         }
 
@@ -104,8 +171,8 @@ fun CaptureScreen(
                         viewModel.startCapture(duration.toInt(), samplingFrequency)
 
                     } else {
-                        // Detiene captura
-                        viewModel.cancelCapture()
+                        // activamos el diálogo de cancelación -> Detiene la captura
+                        showCancelDialog = true
                     }
                 },
                 isValidDuration = isValidDuration,

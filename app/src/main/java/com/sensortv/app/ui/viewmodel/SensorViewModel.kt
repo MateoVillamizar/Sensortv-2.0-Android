@@ -14,10 +14,13 @@ import com.sensortv.app.domain.SaveCaptureUseCase
 import com.sensortv.app.domain.StartCaptureTimerUseCase
 import com.sensortv.app.ui.model.SensorChartData
 import com.sensortv.app.ui.model.SensorChartPoint
+import com.sensortv.app.ui.utils.UiEvent
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -72,9 +75,21 @@ class SensorViewModel(
     private var captureJob: Job? = null
     private var monitoringJob: Job? = null
 
-    // otros estados ...
+    // otros estados
     private var originalDurationMinutes: Int = 0     // Para no perder la duración ingresada al iniciar captura
-    private val capturedLines = mutableListOf<String>() // Historial de filas para el CSV
+    /** Historial de filas para el CSV */
+    private val capturedLines = mutableListOf<String>()
+
+    /**
+     * Canal privado para la emisión de eventos únicos de UI.
+     * [Channel.BUFFERED] permite que los eventos se mantengan en cola si la UI no está lista.
+     */
+    private val _uiEvent = Channel<UiEvent>(Channel.BUFFERED)
+    /**
+     * Flujo de eventos expuesto como Flow para ser recolectado por la UI.
+     * receiveAsFlow asegura que cada evento se consuma una sola vez.
+     */
+    val uiEvent = _uiEvent.receiveAsFlow()
 
     init {
         startMonitoring()
@@ -216,6 +231,9 @@ class SensorViewModel(
     /**
      * Transforma el estado actual de los sensores y la energía acumulada en una lista
      * de resultados lista para ser persistida.
+     *
+     * - La energía total se expresa en Joules (J) como resultado de la integración discreta (P * Δt).
+     *  - Se incluye la conversión a milijoules (mJ) para facilitar análisis adicional.
      *
      * @return Lista de [SensorResult] con los datos consolidados de la sesión.
      */
@@ -373,8 +391,10 @@ class SensorViewModel(
                     allMeasurements = capturedLines,
                     sensorResults = results
                 )
+                sendUiMessage("Captura de datos guardada exitosamente")
             } catch (e: Exception) {
                 Log.e("CaptureViewModel", "Error al guardar captura", e)
+                sendUiMessage("Error: No se pudo guardar la captura")
             } finally {
                 // Limpieza de estados tras el guardado
                 _isCapturing.value = false
@@ -411,6 +431,17 @@ class SensorViewModel(
             // Reiniciar monitoreo normal
             userSamplingFrequency = 1
             restartMonitoring()
+        }
+    }
+
+    /**
+     * Envía un evento de notificación a la UI.
+     *
+     * @param message Texto a mostrar en el Toast.
+     */
+    fun sendUiMessage(message: String) {
+        viewModelScope.launch {
+            _uiEvent.send(UiEvent.ShowToast(message))
         }
     }
 }

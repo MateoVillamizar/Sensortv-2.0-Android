@@ -3,12 +3,18 @@ package com.sensortv.app.ui.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sensortv.app.data.model.CaptureRecordEntity
 import com.sensortv.app.domain.DeleteCaptureUseCase
 import com.sensortv.app.domain.ExportAllCapturesUseCase
 import com.sensortv.app.domain.GetCaptureHistoryUseCase
+import com.sensortv.app.ui.utils.UiEvent
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.Channel.Factory
+import kotlinx.coroutines.channels.Channel.Factory.BUFFERED
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.io.File
@@ -28,6 +34,17 @@ class HistoryViewModel(
 ): ViewModel() {
 
     /**
+     * Canal privado para la emisión de eventos únicos de UI.
+     * [Channel.BUFFERED] permite que los eventos se mantengan en cola si la UI no está lista.
+     */
+    private val _uiEvent = Channel<UiEvent>(Channel.BUFFERED)
+    /**
+     * Flujo de eventos expuesto como Flow para ser recolectado por la UI.
+     * receiveAsFlow asegura que cada evento se consuma una sola vez.
+     */
+    val uiEvent = _uiEvent.receiveAsFlow()
+
+    /**
      * Flujo de capturas / registros obtenidos de la base de datos.
      * Se expone como StateFlow para que la UI de Compose lo observe.
      */
@@ -45,7 +62,12 @@ class HistoryViewModel(
      */
     fun deleteRecord(record: CaptureRecordEntity) {
         viewModelScope.launch {
-            deleteCaptureUseCase(record)
+            try {
+                deleteCaptureUseCase(record)
+                sendUiMessage("Registro eliminado correctamente")
+            } catch (e: Exception) {
+                sendUiMessage("Error al eliminar el registro")
+            }
         }
     }
 
@@ -64,10 +86,23 @@ class HistoryViewModel(
             try {
                 val zip = exportAllCapturesUseCase(historyRecords.value)
                 onResult(zip)
+                sendUiMessage("Todos los registros exportados correctamente")
             } catch (e: Exception) {
                 Log.e("DEBUG_ZIP", "Error al exportar: ${e.message}", e)
+                sendUiMessage("Error al exportar los registros")
                 onResult(null)
             }
+        }
+    }
+
+    /**
+     * Envía un evento de notificación a la UI.
+     *
+     * @param message Texto a mostrar en el Toast.
+     */
+    fun sendUiMessage(message: String) {
+        viewModelScope.launch {
+            _uiEvent.send(UiEvent.ShowToast(message))
         }
     }
 }

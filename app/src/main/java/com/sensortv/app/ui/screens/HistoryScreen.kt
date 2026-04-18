@@ -11,13 +11,18 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -32,6 +37,7 @@ import com.sensortv.app.ui.utils.shareCsvFile
 import com.sensortv.app.ui.utils.shareZip
 import com.sensortv.app.ui.utils.viewCsvFile
 import com.sensortv.app.ui.viewmodel.HistoryViewModel
+import com.sensortv.app.ui.viewmodel.SensorViewModel
 
 /**
  * Pantalla que muestra el historial de registros de datos capturados.
@@ -49,6 +55,48 @@ fun HistoryScreen(
     val records by viewModel.historyRecords.collectAsStateWithLifecycle()   // Convertir el StateFlow en un Estado de Compose
     val context = LocalContext.current
 
+    /**
+     * Estado que almacena el registro que el usuario intenta eliminar.
+     * Si es null, el diálogo está oculto. Si tiene un objeto, se muestra el diálogo.
+     */
+    var recordToDelete by remember { mutableStateOf<CaptureRecordEntity?>(null) }
+
+    recordToDelete?.let { record ->
+        AlertDialog(
+            onDismissRequest = { recordToDelete = null }, // Cierra si toca fuera
+
+            title = {
+                Text(
+                    text = "Confirmar eliminación",
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.headlineSmall
+                )
+            },
+            text = {
+                Text(
+                    text = "¿Estás seguro de que deseas eliminar el registro '${record.fileName}'? Esta acción no se puede deshacer.",
+                    textAlign = TextAlign.Justify,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.deleteRecord(record)
+                        recordToDelete = null // Cerrar diálogo tras la acción
+                    }
+                ) {
+                    Text(text = "Eliminar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { recordToDelete = null }) {
+                    Text(text = "Cancelar")
+                }
+            }
+        )
+    }
+
     Scaffold(
         topBar = { StandardTopBar("Historial de Registros") }
     ) { innerPadding ->
@@ -63,7 +111,7 @@ fun HistoryScreen(
             items(records) { record ->
                 HistoryRecordCard(
                     record = record,
-                    onDelete = { viewModel.deleteRecord(record) },
+                    onDelete = { recordToDelete = record }, // asignamos el registro al estado
                     onShare = { shareCsvFile(context, record.filePath) },
                     onView = { viewCsvFile(context, record.filePath) }
                 )
