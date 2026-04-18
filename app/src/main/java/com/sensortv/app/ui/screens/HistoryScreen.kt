@@ -220,7 +220,7 @@ fun HistoryRecordCard(
                 Box(modifier = Modifier.weight(1f)) {
                     AppButton(text = "Ver", onClick = onView, isPrimary = true)
                 }
-                Box(modifier = Modifier.weight(1f)) {
+                Box(modifier = Modifier.weight(1.2f)) {
                     AppButton(text = "Exportar", onClick = onShare, isPrimary = true)
                 }
                 // Botón de eliminar (puedes usar un IconButton si prefieres)
