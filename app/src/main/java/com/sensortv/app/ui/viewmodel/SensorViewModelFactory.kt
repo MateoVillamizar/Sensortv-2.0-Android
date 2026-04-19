@@ -31,35 +31,24 @@ class SensorViewModelFactory(
     private val context: Context
 ) : ViewModelProvider.Factory {
 
-    // Suprime advertencia de cast inseguro (as T); pero sabemos que es correcto por la lógica del factory.
+    // Suprime advertencia de cast inseguro (as T); pero se sabe que es correcto por la lógica del factory.
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         // Se verifica que se esté solicitando el ViewModel (SensorViewModel) correcto
         if (modelClass.isAssignableFrom(SensorViewModel::class.java)) {
 
-            // Construcción de dependencias
-            val db = DatabaseProvider.getDatabase(context)
-            val captureDao = db.captureDao()
-
             val sensorDataSource = AndroidSensorDataSource(context)
             val batteryDataSource = AndroidBatteryDataSource(context)
-            val csvDataSource = AndroidCsvDataSource(context)
 
             val sensorRepo = SensorRepositoryImpl(sensorDataSource)
             val batteryRepo = BatteryRepositoryImpl(batteryDataSource)
-            val captureRepo = CaptureRepositoryImpl(captureDao)
 
             val observeSensorPowerUseCase = ObserveSensorPowerUseCase(sensorRepo, batteryRepo)
-            val startCaptureTimerUseCase = StartCaptureTimerUseCase()
-            val calculateEnergyUseCase = CalculateEnergyUseCase()
-            val saveCaptureUseCase = SaveCaptureUseCase(csvDataSource, captureRepo)
 
             return SensorViewModel(
                 observeSensorPowerUseCase,
-                startCaptureTimerUseCase,
-                calculateEnergyUseCase,
-                saveCaptureUseCase,
-                batteryRepo
+                batteryRepo,
+                context
             ) as T
         }
         throw IllegalArgumentException("Error: Clase ViewModel no compatible con esta Factory")

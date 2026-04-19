@@ -113,7 +113,6 @@ fun CaptureScreen(
                     onClick = {
                         viewModel.cancelCapture()
                         showCancelDialog = false
-                        viewModel.sendUiMessage("Captura cancelada")
                     }
                 ) {
                     Text("Detener y descartar")

@@ -2,6 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Permite ejecutar un servicio en primer plano para captura continua de datos -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+
+    <!-- Permite mostrar la notificación obligatoria del Foreground Service -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -34,6 +41,15 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+
+        <!-- Servicio foreground que realiza captura continua de datos de consumo estimado de sensores -->
+        <service
+            android:name=".data.service.SensorCaptureService"
+            android:foregroundServiceType="specialUse"
+            android:exported="false">
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_SERVICE_TYPE"
+                android:value="La aplicación mide el consumo estimado de energía de cinco sensores del teléfono en tiempo real para análisis y comparación de consumo."/>
+        </service>
 
     </application>
 
