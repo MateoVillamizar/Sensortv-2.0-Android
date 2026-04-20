@@ -6,14 +6,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.sensortv.app.ui.viewmodel.SensorViewModel
-import com.sensortv.app.ui.viewmodel.SensorViewModelFactory
 import com.sensortv.app.ui.screens.CaptureScreen
 import com.sensortv.app.ui.screens.HistoryScreen
 import com.sensortv.app.ui.screens.MainMenuScreen
 import com.sensortv.app.ui.screens.MonitoringScreen
 import com.sensortv.app.ui.viewmodel.HistoryViewModel
 import com.sensortv.app.ui.viewmodel.HistoryViewModelFactory
+import com.sensortv.app.ui.viewmodel.SensorViewModel
+import com.sensortv.app.ui.viewmodel.SensorViewModelFactory
 
 /**
  * Define el grafo de navegación principal de SensorTV 2.0.

@@ -3,19 +3,11 @@ package com.sensortv.app.ui.viewmodel
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.room.Room
 import com.sensortv.app.data.datasource.AndroidBatteryDataSource
-import com.sensortv.app.data.datasource.AndroidCsvDataSource
 import com.sensortv.app.data.datasource.AndroidSensorDataSource
-import com.sensortv.app.data.datasource.AppDatabase
-import com.sensortv.app.data.model.DatabaseProvider
 import com.sensortv.app.data.repository.BatteryRepositoryImpl
-import com.sensortv.app.data.repository.CaptureRepositoryImpl
 import com.sensortv.app.data.repository.SensorRepositoryImpl
-import com.sensortv.app.domain.CalculateEnergyUseCase
 import com.sensortv.app.domain.ObserveSensorPowerUseCase
-import com.sensortv.app.domain.SaveCaptureUseCase
-import com.sensortv.app.domain.StartCaptureTimerUseCase
 
 /**
  * Fábrica personalizada para la creación del [SensorViewModel].

@@ -36,10 +36,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.sensortv.app.data.model.SensorData
-import com.sensortv.app.ui.viewmodel.SensorViewModel
 import com.sensortv.app.ui.components.AppButton
 import com.sensortv.app.ui.components.StandardTopBar
 import com.sensortv.app.ui.navigation.AppRoutes
+import com.sensortv.app.ui.viewmodel.SensorViewModel
 
 /**
  * Pantalla del menú principal de SensorTV 2.0.

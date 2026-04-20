@@ -34,12 +34,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import com.sensortv.app.ui.viewmodel.SensorViewModel
 import com.sensortv.app.ui.components.AppButton
 import com.sensortv.app.ui.components.SamplingFrequencySelector
 import com.sensortv.app.ui.components.StandardTopBar
 import com.sensortv.app.ui.navigation.AppRoutes
 import com.sensortv.app.ui.utils.UiEvent
+import com.sensortv.app.ui.viewmodel.SensorViewModel
 
 /**
  * Pantalla para configurar y controlar la captura de datos de sensores.

@@ -282,30 +282,6 @@ class SensorViewModel(
         CaptureServiceManager.resetState()
     }
 
-//    /**
-//     * Cancela la captura de datos actual sin persistir información.
-//     *
-//     * - Verifica si existe una sesión de captura activa para evitar ejecuciones innecesarias.
-//     * - Restablece los estados relacionados con la captura (_isCapturing y _remainingTime).
-//     * - Cancela la corrutina asociada al temporizador para detener la cuenta regresiva.
-//     * - Limpia los datos temporales acumulados (energía y líneas capturadas).
-//     * - Reinicia la configuración predeterminada de muestreo y el monitoreo de sensores.
-//     */
-//    fun cancelCapture() {
-//        if(_isCapturing.value) {
-//            stopCapture()
-//            _isCapturing.value = false
-//            _remainingTime.value = 0
-//
-//            // Reiniciar monitoreo normal
-//            userSamplingFrequency = 3
-//            restartMonitoring()
-//
-//            stopCapture()
-//            sendUiMessage("Captura cancelada y servicio detenido")
-//        }
-//    }
-
     /**
      * Cancela la captura de datos actual sin persistir información y
      * notifica al usuario.

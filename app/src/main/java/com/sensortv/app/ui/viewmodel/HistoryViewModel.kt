@@ -3,15 +3,12 @@ package com.sensortv.app.ui.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sensortv.app.data.model.CaptureRecordEntity
 import com.sensortv.app.domain.DeleteCaptureUseCase
 import com.sensortv.app.domain.ExportAllCapturesUseCase
 import com.sensortv.app.domain.GetCaptureHistoryUseCase
 import com.sensortv.app.ui.utils.UiEvent
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.Channel.Factory
-import kotlinx.coroutines.channels.Channel.Factory.BUFFERED
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.receiveAsFlow

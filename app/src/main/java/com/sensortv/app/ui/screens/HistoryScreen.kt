@@ -37,7 +37,6 @@ import com.sensortv.app.ui.utils.shareCsvFile
 import com.sensortv.app.ui.utils.shareZip
 import com.sensortv.app.ui.utils.viewCsvFile
 import com.sensortv.app.ui.viewmodel.HistoryViewModel
-import com.sensortv.app.ui.viewmodel.SensorViewModel
 
 /**
  * Pantalla que muestra el historial de registros de datos capturados.

@@ -34,12 +34,12 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.sensortv.app.data.model.SensorData
-import com.sensortv.app.ui.viewmodel.SensorViewModel
 import com.sensortv.app.ui.components.AppButton
 import com.sensortv.app.ui.components.Chart.SensorPowerChart
 import com.sensortv.app.ui.components.StandardTopBar
 import com.sensortv.app.ui.components.getSensorIcon
 import com.sensortv.app.ui.navigation.AppRoutes
+import com.sensortv.app.ui.viewmodel.SensorViewModel
 
 /**
  * Pantalla que muestra la lectura y monitoreo de los sensores en tiempo real mediante una gráfica lineal.

@@ -1,9 +1,13 @@
 package com.sensortv.app.ui.components
 
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.RotateRight
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.DeviceUnknown
+import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.Sensors
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.ui.graphics.vector.ImageVector
 
 /**
  * Función que devuelve el icono correspondiente para un tipo de sensor específico

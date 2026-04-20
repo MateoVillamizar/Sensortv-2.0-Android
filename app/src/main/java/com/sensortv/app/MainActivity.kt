@@ -31,7 +31,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             SensorTV20Theme {
                 val navController = rememberNavController()
-                AppNavHost(navController = navController)
+                    AppNavHost(navController = navController)
             }
         }
     }
