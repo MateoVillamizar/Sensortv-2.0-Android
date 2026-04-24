@@ -87,6 +87,9 @@ class SensorViewModel(
     private val _uiEvent = Channel<UiEvent>(Channel.BUFFERED)
     val uiEvent = _uiEvent.receiveAsFlow()  // receiveAsFlow asegura que cada evento se consuma una sola vez
 
+    /** Mapa que mantiene el último valor conocido de cada sensor para evitar pérdidas cuando no emiten eventos */
+    private val latestSensorMap = mutableMapOf<Int, SensorData>()
+
     init {
         startMonitoring()
         observeBattery()
@@ -137,31 +140,19 @@ class SensorViewModel(
     /**
      * Actualiza la lista de sensores manteniendo inmutabilidad.
      *
-     * 1. Identificar si el sensor entrante ya está registrado mediante una bandera (sensorExists).
-     * 2. Si el sensor ya existe, se actualizan sus valores.
-     * 3. Si el sensor es nuevo, se agrega a la lista.
+     * - Utiliza un mapa interno como fuente de verdad para evitar la pérdida de sensores
+     * cuando estos no emiten eventos continuamente (ej. sensor de proximidad).
+     * - Garantiza que la lista observable represente siempre el estado completo de sensores activos.
      *
      * @param newData Información actualizada del sensor proveniente del repositorio.
      */
     private fun updateSensorList(newData: SensorData) {
-        _sensorList.update { currentList ->
 
-            var sensorExists = false
+        // Actualizar o insertar el sensor
+        latestSensorMap[newData.type] = newData
 
-            val updatedList = currentList.map { sensor ->
-                if (sensor.type == newData.type) {
-                    sensorExists = true
-                    sensor.copy(
-                        values = newData.values,
-                        frequencyHz = newData.frequencyHz,
-                        isAvailable = true,
-                        estimatedPowerMw = newData.estimatedPowerMw
-                    )
-                } else sensor
-            }
-
-            if (sensorExists) updatedList else updatedList + newData
-        }
+        // Mantener lista sincronizada con el mapa
+        _sensorList.value = latestSensorMap.values.toList()
     }
 
     /**
