@@ -12,7 +12,7 @@ import androidx.room.PrimaryKey
  * @property durationMinutes Duración total de la captura en minutos.
  * @property samplingFrequencySeconds Frecuencia de muestreo utilizada (en segundos).
  * @property dateMillis Marca de tiempo en milisegundos desde epoch (Unix time).
- * Se usa para ordenar los registros cronológicamente (más recientes primero).
+ * Puede utilizarse para ordenar los registros cronológicamente.
  * @property filePath Ruta absoluta en el almacenamiento del dispositivo donde se guarda el archivo CSV.
  */
 @Entity(tableName = "capture_records")

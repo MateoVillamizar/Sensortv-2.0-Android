@@ -17,7 +17,7 @@ class DeleteCaptureUseCase(
 ) {
     /**
      * Ejecuta la eliminación sincronizada.
-     * 1. Borra el archivo físico (CSV) del almacenamiento externo (almacenamiento interno del dispositivo).
+     * 1. Borra el archivo físico (CSV) del almacenamiento externo privado de la aplicación
      * 2. Borra el registro de la base de datos Room.
      *
      * @param record Entidad que contiene la ruta del archivo y el ID en la BD.

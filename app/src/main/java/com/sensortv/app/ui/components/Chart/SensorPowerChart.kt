@@ -162,7 +162,7 @@ fun SensorPowerChart(
  * Componente de la leyenda que muestra el color y nombre de un sensor.
  *
  * @param name Nombre del sensor.
- * @param color Color para del sensor en la leyenda.
+ * @param color Color del sensor en la leyenda.
  */
 @Composable
 fun LegendItem(name: String, color: Color) {

@@ -17,7 +17,7 @@ import com.sensortv.app.ui.theme.SensorTV20Theme
  * Responsabilidades:
  * - Configurar el entorno visual mediante [enableEdgeToEdge] y el tema [SensorTV20Theme].
  * - Gestionar la solicitud de permisos críticos para el Foreground Service.
- * - Orquestar la navegación base a través de [AppNavHost].
+ * - Orquestar la navegación principal de la aplicación mediante un único NavHost: [AppNavHost].
  */
 class MainActivity : ComponentActivity() {
 
@@ -38,10 +38,12 @@ class MainActivity : ComponentActivity() {
 
     /**
      * Verifica y solicita al usuario los permisos necesarios para el correcto funcionamiento
-     * del sistema de notificaciones del servicio (Android 13+).
+     * del sistema de notificaciones del servicio en dispositivos con Android 13 (API 33) o superior.
      *
-     * Nota: Sin este permiso, el servicio de captura se ejecutará, pero la notificación
-     * obligatoria no será visible y no se cumpliría con las prácticas recomendadas
+     * - Nota: Este permiso no es requerido en versiones anteriores del sistema operativo.
+     * - Nota: Sin este permiso, el servicio de captura se ejecutará, pero la notificación
+     * obligatoria no será visible, incumpliendo los requisitos del sistema para servicios en
+     * primer plano en versiones recientes de Android.
      */
     private fun checkAndRequestPermissions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.combine
  *
  * @param sensorRepository Fuente de datos de los sensores (Contiene corriente nominal).
  * @param batteryRepository Fuente de datos de la batería (Contiene voltaje actual).
- * return [Flow] de [SensorData] donde cada objeto contiene el cálculo de [estimatedPowerMw].
+ * @return [Flow] de [SensorData] donde cada objeto contiene el cálculo de [estimatedPowerMw].
  */
 class ObserveSensorPowerUseCase(
     private val sensorRepository: SensorRepository,
@@ -28,7 +28,7 @@ class ObserveSensorPowerUseCase(
             sensorRepository.observeSensors(),
             batteryRepository.observeBattery()
         ) { sensorData, batteryData ->
-            // Cálculo de potencia: P = V * I : Voltios (V) * Miliamperios (mA) = Miliwatts (mW)
+            // Cálculo de potencia: P = V × I → Voltios (V) × miliamperios (mA) = miliwatts (mW)
             val estimatedPowermW =  batteryData.voltage * sensorData.nominalConsumptionmA
 
             sensorData.copy(estimatedPowerMw = estimatedPowermW)

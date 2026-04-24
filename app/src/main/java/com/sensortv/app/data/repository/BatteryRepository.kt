@@ -11,7 +11,7 @@ interface BatteryRepository {
     /**
      * Provee un flujo observable con el estado de la batería del dispositivo.
      *
-     * @return [Flow] que emite [BatteryData] cada vez hay un cambio en el estado de la batería.
+     * @return [Flow] que emite [BatteryData] ante cambios en la batería.
      */
     fun observeBattery(): Flow<BatteryData>
 }

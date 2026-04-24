@@ -16,7 +16,7 @@ class SensorRepositoryImpl(
     /**
      * Expone el flujo de datos de sensores sin procesar lógica de negocio compleja.
      *
-     * @return [Flow] reactivo que emite [SensorData] con la información del hardware.
+     * @return [Flow] reactivo que emite [SensorData] ante nuevas lecturas del hardware.
      */
     override fun observeSensors(): Flow<SensorData> = sensorDataSource.observeSensorData()
 }

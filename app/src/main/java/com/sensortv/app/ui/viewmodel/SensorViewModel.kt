@@ -27,7 +27,7 @@ import kotlinx.coroutines.launch
 /**
  * ViewModel encargado de gestionar la lógica de presentación y estado de SensorTV 2.0.
  * - Se encarga de transformar los datos de los sensores en representaciones visuales
- * (listas y gráficas) y de actuar como puente de control para el servicio de captura.
+ * (listas y gráficas) y de actuar como intermediario entre la UI y el servicio de captura en segundo plano.
  **
  * @param observeSensorPowerUseCase Caso de uso para calcular la potencia en tiempo real (P = V * I).
  * @param batteryRepository Repositorio para observar cambios en el estado de la batería.
@@ -56,7 +56,9 @@ class SensorViewModel(
     // Estados de Captura (Sincronizados con el Manager)
 
     /** Estado de captura sincronizado con el Servicio de segundo plano (SensorCaptureService)
-     * No es gestionado directamente por el ViewModel.*/
+     * Su valor es sincronizado con el estado global gestionado por el
+     * SensorCaptureService a través de CaptureServiceManager.
+     */
     private val _isCapturing = MutableStateFlow(false)
     val isCapturing: StateFlow<Boolean> = _isCapturing
 
@@ -110,7 +112,7 @@ class SensorViewModel(
      * Recolecta el flujo de potencia de los sensores y coordina las actualizaciones de UI.
      *
      * - Actualiza la lista de sensores en cada emisión para mantener valores instantáneos.
-     * - La gráfica se actualiza según la frecuencia de muestreo para ahorrar recursos.
+     * - La gráfica se actualiza según la frecuencia de muestreo para optimizar el consumo de recursos.
      *
      * Nota:
      * Este flujo es independiente del proceso de captura persistente, el cual es
@@ -165,7 +167,8 @@ class SensorViewModel(
     /**
      * Actualiza los datos de la gráfica (tiempo vs potencia) para cada sensor.
      *
-     * - Convierte la lista actual en un Mapa indexado por tipo de sensor para acceso rápido.
+     * - Convierte la lista actual en un mapa indexado por tipo de sensor para optimizar
+     * el acceso y actualización de datos.
      * - Calcula el tiempo transcurrido (elapsedSeconds) desde el inicio y genera un
      * nuevo punto (P, t) para cada sensor activo.
      * - Limita el histórico a los últimos 25 puntos para mantener la fluidez en la UI.
@@ -249,6 +252,9 @@ class SensorViewModel(
     /**
      * Inicia la captura de datos delegando la responsabilidad al [SensorCaptureService].
      *
+     * - Sincroniza la frecuencia de actualización de la gráfica con la frecuencia de captura
+     * definida por el usuario.
+     *
      * @param durationMinutes Duración total de la sesión de captura.
      * @param samplingFrequency Frecuencia de muestreo, el intervalo entre registros.
      */
@@ -274,7 +280,7 @@ class SensorViewModel(
     /**
      * Detiene el servicio de captura de forma inmediata.
      * La persistencia de los datos y el reseteo del estado global
-     * son gestionados internamente por el Servicio y el Manager.
+     * son responsabilidad del servicio.
      */
     fun stopCapture() {
         val intent = Intent(context, SensorCaptureService::class.java)
@@ -295,7 +301,7 @@ class SensorViewModel(
 
     /**
      * Observa el estado global del [CaptureServiceManager].
-     * Garantiza que la UI refleje el progreso real de la captura,
+     * Garantiza que la UI permanezca consistente con el estado real del servicio,
      * incluso si el ViewModel fue recreado o la app estuvo en segundo plano.
      */
     private fun observeServiceState() {

@@ -12,7 +12,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 /**
  * Función que devuelve el icono correspondiente para un tipo de sensor específico
  *
- * @param sensorName Nombre del tipo de sensor.
+ * @param sensorName Nombre legible del sensor (displayName).
  * @return El icono correspondiente al tipo de sensor.
  */
 fun getSensorIcon(sensorName: String): ImageVector {

@@ -10,8 +10,8 @@ package com.sensortv.app.ui.model
  * @property window Tamaño de la ventana de tiempo visible para el gráfico.
  * @property paddingLeft Margen izquierdo del gráfico.
  * @property paddingTop Margen superior del gráfico.
- * @property chartWidth Ancho utilizable del gráfico Canvas (sin padding).
- * @property chartHeight Alto utilizable del gráfico Canvas (sin padding).
+ * @property chartWidth Ancho útil del gráfico Canvas (sin padding).
+ * @property chartHeight Alto útil del gráfico Canvas (sin padding).
 */
 data class ChartScale(
     val minX: Float,

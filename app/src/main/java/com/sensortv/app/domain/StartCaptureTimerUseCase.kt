@@ -24,7 +24,7 @@ class StartCaptureTimerUseCase {
         while(remainingSeconds >= 0) {
             emit(remainingSeconds)
             delay(1000)
-            remainingSeconds --
+            remainingSeconds--
         }
     }
 }

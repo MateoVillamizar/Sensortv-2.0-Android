@@ -17,7 +17,7 @@ import com.sensortv.app.domain.ObserveSensorPowerUseCase
  * 3. Instancia los Casos de Uso de la capa Domain.
  *
  * @param context Contexto necesario para que los DataSources accedan a los servicios de hardware.
- * @return [SensorViewModelFactory] Instancia completa de [SensorViewModel] lista para uso en UI.
+ * @return Instancia de [SensorViewModel] completamente inicializada lista para su uso en UI.
  */
 class SensorViewModelFactory(
     private val context: Context

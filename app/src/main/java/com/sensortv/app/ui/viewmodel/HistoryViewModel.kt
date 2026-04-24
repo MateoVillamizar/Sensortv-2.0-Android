@@ -18,7 +18,7 @@ import java.io.File
 
 /**
  * ViewModel encargado de la gestión del historial de capturas.
- * Proporciona el estado de los registros y coordina las acciones de borrado y consulta.
+ * Proporciona el estado del historial de capturas y coordina las acciones de eliminación y exportación de registros.
  *
  * @param getCaptureHistoryUseCase Caso de uso para obtener el historial de capturas.
  * @param deleteCaptureUseCase Caso de uso para eliminar una captura.
@@ -74,7 +74,8 @@ class HistoryViewModel(
      * - Captura cualquier error durante el proceso de compresión.
      * - Notifica el resultado a la UI mediante el callback [onResult] al finalizar el proceso.
      *
-     * @param onResult Función que se invoca al terminar, recibiendo el archivo ZIP o null si ocurrió un error.
+     * @param onResult Función que se invoca al terminar, recibiendo el archivo ZIP generado o null
+     * si no fue posible completar la exportación.
      */
     fun exportAll(
         onResult: (File?) -> Unit

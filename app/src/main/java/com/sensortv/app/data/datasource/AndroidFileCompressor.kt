@@ -22,7 +22,7 @@ class AndroidFileCompressor(
 
     /**
      * Toma una lista de archivos existentes y los agrupa en un nuevo archivo .zip
-     * almacenado en el directorio de caché interno.
+     * almacenado en el directorio de caché interno (context.cacheDir).
      *
      * - Utiliza [Dispatchers.IO] para asegurar que la UI no se bloquee.
      * - Filtra automáticamente archivos que no existan.

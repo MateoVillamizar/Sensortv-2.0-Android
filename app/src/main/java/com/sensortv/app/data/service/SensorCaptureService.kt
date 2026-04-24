@@ -106,7 +106,7 @@ class SensorCaptureService : Service() {
      * El monitoreo permanece activo durante toda la vida del servicio.
      */
     private fun startContinuousMonitoring() {
-        monitoringJob = serviceScope.launch(Dispatchers.Default) { // default está optimizado para tareas de CPU fuera del hilo principal
+        monitoringJob = serviceScope.launch(Dispatchers.Default) { // Dispatchers.Default está optimizado para tareas de CPU fuera del hilo principal.
             observeSensorPowerUseCase().collect { data ->
                 latestSensorValues[data.type] = data.estimatedPowerMw
 
@@ -209,7 +209,7 @@ class SensorCaptureService : Service() {
      * un nuevo evento, se utiliza el último valor conocido de [latestSensorValues] para
      * mantener continuidad en la señal cuando un sensor no emite nuevos eventos.
      *
-     * @param frequency Intervalo de muestreo en segundos utilizado como Δt para calculo de energía.
+     * @param frequency Intervalo de muestreo en segundos utilizado como Δt para cálculo de energía.
      */
     private suspend fun processSnapshot(frequency: Int) {
         val timeTag = java.time.Instant.now().toString()
@@ -251,7 +251,7 @@ class SensorCaptureService : Service() {
         val sensorResults = prepareFinalResults()
 
         try {
-            // Persistencia delegada al Caso de Uso (Capa de Datos)
+            // Persistencia delegada al Caso de Uso (Capa de Dominio)
             saveCaptureUseCase(
                 timestamp = timestamp,
                 durationMinutes = durationMinutes,
@@ -270,7 +270,7 @@ class SensorCaptureService : Service() {
     }
 
     /**
-     * Consolida los datos de energía acumulada por sensor en objetos [SensorResult]
+     * Consolida los datos de energía acumulada por sensor en objetos [SensorResult].
      *
      * Cada resultado representa el consumo total de energía registrado durante
      * toda la sesión de captura, listo para persistencia o visualización.
@@ -313,7 +313,7 @@ class SensorCaptureService : Service() {
      * Crea el canal de notificación requerido para ejecutar el Foreground Service
      * en dispositivos con Android 8.0 (API 26) o superior.
      *
-     * - IMPORTANCE_DEFAULT se utiliza porque la notificación solo informa
+     * - IMPORTANCE_LOW se utiliza porque la notificación solo informa
      * el estado del servicio sin requerir alta prioridad visual o sonora.
      */
     private fun createNotificationChannel() {

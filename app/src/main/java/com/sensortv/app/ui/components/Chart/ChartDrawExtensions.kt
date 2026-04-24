@@ -60,8 +60,8 @@ fun DrawScope.drawGridY(
 }
 
 /**
- * Dibuja las líneas verticales del grid y las etiquetas de tiempo (eje X) junto con
- * sus etiquetas de tiempo. Alineadas al stepX definido en la configuración.
+ * Dibuja las líneas verticales del grid y las etiquetas de tiempo (eje X).
+ * Alineadas al stepX definido en la configuración.
  *
  * @param chartScale Escala calculada del gráfico
  * @param config Configuración del gráfico (incluye stepX).
@@ -130,7 +130,7 @@ fun DrawScope.drawAxes(
 /**
  * Dibuja las líneas y puntos de cada sensor en el gráfico.
  *
- * - Filtra puntos visibles según la ventana actual del gráfico en tiempo (minX)
+ * - Filtra puntos visibles según el rango visible (ventana) en el eje X (minX)
  * - Convierte cada punto a coordenadas usando ChartScale.
  * - Dibuja círculos en cada punto y opcionalmente etiquetas de valor.
  *

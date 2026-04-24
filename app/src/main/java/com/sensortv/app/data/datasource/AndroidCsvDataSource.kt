@@ -9,7 +9,7 @@ import java.io.File
 /**
  * Implementación de [CsvDataSource] que utiliza la API de archivos de Android.
  *
- * @param context Contexto necesario para obtener el servicio FILE_SERVICE.
+ * @param context Contexto necesario para acceder al almacenamiento de archivos de la aplicación.
  */
 class AndroidCsvDataSource(
     private val context: Context
@@ -19,6 +19,8 @@ class AndroidCsvDataSource(
      * Escribe una lista de strings en un archivo físico en el almacenamiento local del dispositivo.
      * Esta operación se ejecuta en un hilo de I/O utilizando [Dispatchers.IO] para evitar
      * bloquear el hilo principal.
+     *
+     * - El contenido se normaliza eliminando acentos y convirtiendo a mayúsculas.
      *
      * @param fileName Nombre del archivo con extensión (ej: "mediciones.csv").
      * @param content Lista de líneas de texto (String) a escribir.
@@ -38,7 +40,7 @@ class AndroidCsvDataSource(
 
         /**
          * Escribe el contenido en el archivo usando UTF-8 (Charsets.UTF_8 explícitamente).
-         * Cada línea se normaliza (sin acentos y en mayúsculas).
+         * Cada línea se normaliza (sin acentos y convirtiendo a mayúsculas).
          * El bloque `use` asegura que el writer se cierre automáticamente.
          */
         file.outputStream().bufferedWriter(Charsets.UTF_8).use { writer ->

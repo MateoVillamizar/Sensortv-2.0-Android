@@ -10,7 +10,8 @@ import java.io.File
 /**
  * Lanza un selector de aplicaciones del sistema para exportar un archivo específico.
  *
- * - Válida la existencia del archivo y lo convierte en Uri segura mediante FileProvider.
+ * - Válida la existencia del archivo antes de proceder con la exportación.
+ * - Convierte el archivo en una Uri segura mediante FileProvider para evitar accesos directos al sistema de archivos.
  * - Lanza un Intent ACTION_SEND con el archivo adjunto (EXTRA_STREAM).
  * - Se utiliza un chooser para que el usuario seleccione la app preferida para exportar el archivo.
  *
@@ -37,15 +38,17 @@ fun shareCsvFile(context: Context, filePath: String) {
         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)             // Necesario si el contexto no es Activity
     }
 
-    context.startActivity(Intent.createChooser(shareIntent, "exportar registro CSV mediante:"))
+    context.startActivity(Intent.createChooser(shareIntent, "Exportar registro CSV mediante:"))
 }
 
 /**
- * Solicita al sistema abrir un archivo CSV con una aplicación compatible del dispositivo (ej. Excel, visores csv, etc).
+ * Solicita al sistema abrir un archivo CSV con una aplicación compatible instalada en el dispositivo.
+ * (ej. Excel, visores csv, etc).
  *
  * - Válida la existencia del archivo y lo convierte en Uri segura mediante FileProvider.
  * - Lanza un Intent ACTION_VIEW con el archivo como dato principal.
  * - Se utiliza un chooser para que el usuario seleccione la app preferida para abrir el archivo.
+ * - Maneja posibles errores en caso de que no existan aplicaciones capaces de procesar el archivo.
  *
  * @param context Contexto de la actividad desde donde se lanza el Intent.
  * @param filePath Ruta absoluta del archivo físico en el almacenamiento.
@@ -76,6 +79,8 @@ fun viewCsvFile(context: Context, filePath: String) {
 
 /**
  * Lanza el selector de aplicaciones para exportar el paquete comprimido ZIP.
+ * Se asume que el archivo existe y ha sido previamente validado por la capa de dominio.
+ *
  * - Convierte el objeto File en una Uri segura a través del FileProvider.
  * - Lanza un Intent ACTION_SEND con el ZIP adjunto (EXTRA_STREAM).
  * - Otorga permisos de lectura temporales a la aplicación receptora.

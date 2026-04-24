@@ -17,7 +17,7 @@ object CaptureServiceManager {
     /** Flujo interno de estado mutable que solo el Manager puede modificar. */
     private val _captureState = MutableStateFlow(CaptureState())
 
-    /** Flujo de estado público de solo lectura expuesto como StateFlow.
+    /** Flujo de estado público de solo lectura expuesto como StateFlow inmutable.
      * La UI se debe suscribir a este flujo para reaccionar a la captura.
      */
     val captureState: StateFlow<CaptureState> = _captureState.asStateFlow()

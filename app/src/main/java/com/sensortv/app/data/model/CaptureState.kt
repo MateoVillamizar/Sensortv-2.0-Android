@@ -6,8 +6,7 @@ package com.sensortv.app.data.model
  *
  * @property isCapturing Indica si hay un proceso de recolección de datos activo actualmente.
  * @property remainingSeconds Tiempo faltante para completar la sesión programada.
- * @property samplingFrequency Intervalo seleccionado (en segundos) para el registro de datos.
- * Tiene un valor por defecto de 3 segundos.
+ * @property samplingFrequency Intervalo de muestreo en segundos para el registro de datos (por defecto 3s).
  * @property currentPowerData Última lectura de potencia procesada (para actualizar la UI).
  */
 data class CaptureState(

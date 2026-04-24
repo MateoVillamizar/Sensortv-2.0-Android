@@ -19,8 +19,8 @@ object DatabaseProvider {
      * Proporciona una instancia única de [AppDatabase].
      *
      * Verifica si ya existe una instancia creada:
-     * 2. Si existe, la retorna inmediatamente.
-     * 3. Si no existe entra en un bloque sincronizado (thread-safe)
+     * 1. Si existe, la retorna inmediatamente.
+     * 2. Si no existe entra en un bloque sincronizado (thread-safe)
      * crea la base de datos usando Room, guardando la instancia para futuras llamadas.
      *
      * @param context Contexto de aplicación necesario para inicializar Room.

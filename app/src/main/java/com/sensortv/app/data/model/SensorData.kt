@@ -9,9 +9,9 @@ package com.sensortv.app.data.model
  * @property values Lista de valores crudos capturados (ejes X,Y,Z o valores únicos).
  * @property frequencyHz Velocidad de muestreo actual del sensor calculada en Hertz (Hz).
  * @property isAvailable Indica si el hardware del sensor está presente y operativo en el dispositivo.
- * @property nominalConsumptionmA Corriente teórica fija consumida por el sensor en mA. (miliamperios).
+ * @property nominalConsumptionmA Corriente nominal del sensor en miliamperios (mA).
  * @property estimatedPowerMw Potencia estimada del sensor en miliwatts (mW)
- * calculada como Voltaje Batería * nominalConsumptionmA.
+ * calculada como Voltaje de batería (V) × corriente (mA), resultando en miliwatts (mW).
  */
 data class SensorData(
     val type: Int,

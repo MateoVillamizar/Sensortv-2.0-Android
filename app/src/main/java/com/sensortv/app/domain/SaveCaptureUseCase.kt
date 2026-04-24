@@ -28,7 +28,7 @@ class SaveCaptureUseCase(
      *
      * @param timestamp Identificador de tiempo para el nombre del archivo (formato YYYY-MM-DD...).
      * @param durationMinutes Duración total que tuvo la captura en minutos.
-     * @param samplingFrequency Frecuencia en segundos utilizada (1, 3 o 5s).
+     * @param samplingFrequency Frecuencia en segundos.
      * @param allMeasurements Lista de todas las filas de mediciones.csv.
      * @param sensorResults Lista de resultados totales de cada sensor.
      */

@@ -1,4 +1,5 @@
 package com.sensortv.app.data.model
+
 /**
  * Representa el estado energético actual del dispositivo móvil.
  *

@@ -268,7 +268,7 @@ fun CaptureStatusCard() {
             )
 
             Text("La captura de datos se guardará automáticamente en dos archivo CSV (mediciones y Total) al finalizar la sesión.")
-            Text("Ruta de los archivo: /Android/storage/emulated/0/Android/data/com.sensortv.app/files/captures/")
+            Text("Ruta de almacenamiento: Directorio interno privado de la aplicación (Android/data/.../captures/)")
         }
     }
 }

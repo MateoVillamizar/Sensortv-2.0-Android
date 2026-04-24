@@ -23,9 +23,10 @@ class AndroidBatteryDataSource(
 
     /**
      * Inicia el monitoreo reactivo del estado de la batería.
-     * * Registra un receptor de emisiones (reciever) del sistema para capturar cambios en el nivel
+     *
+     * - Registra un receptor de emisiones (receiver) del sistema para capturar cambios en el nivel
      * y voltaje de la batería.
-     * * Al dejar de observar este flujo, el receptor se destruye automáticamente para optimizar recursos.
+     * - Al dejar de observar este flujo, el receptor se destruye automáticamente para optimizar recursos.
      *
      * @return Un [Flow] que emite objetos [BatteryData] con valores normalizados (0-100% y Voltios).
      */
@@ -38,6 +39,10 @@ class AndroidBatteryDataSource(
                 val level = intent?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1 // nivel actual de batería
                 val scale = intent?.getIntExtra(BatteryManager.EXTRA_SCALE, -1) ?: -1 // nivel máximo posible de batería
                 val voltage = intent?.getIntExtra(BatteryManager.EXTRA_VOLTAGE, -1) ?: -1 // Valor en milivoltios de batería
+
+                if (level == -1 || scale == -1 || voltage == -1) {
+                    return
+                }
 
                 val percentage = (level * 100) / scale
                 val voltageVolts = voltage / 1000f

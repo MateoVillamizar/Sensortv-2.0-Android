@@ -19,7 +19,7 @@ import com.sensortv.app.domain.GetCaptureHistoryUseCase
  * 4. Inicializa los casos de uso de dominio asociados al historial.
  *
  * @param context Contexto necesario para que los DataSources accedan a los servicios de hardware.
- * @return [HistoryViewModelFactory] Instancia completa de [HistoryViewModel] lista para su uso en UI.
+ * @return Instancia de [HistoryViewModel] completamente inicializada lista para su uso en UI.
  */
 class HistoryViewModelFactory(
     private val context: Context

@@ -12,7 +12,7 @@ class GetCaptureHistoryUseCase(
 ) {
     /**
      * Retorna un Flow con la lista de capturas, permitiendo actualizaciones
-     * en tiempo real en la UI cuando se elimine un registro de la B.D.
+     * en tiempo real en la UI cuando se elimine un registro de la base de datos
      */
     operator fun invoke(): Flow<List<CaptureRecordEntity>> {
         return captureRepository.getRecords()

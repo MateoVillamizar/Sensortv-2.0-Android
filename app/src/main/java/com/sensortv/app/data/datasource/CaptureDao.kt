@@ -21,9 +21,11 @@ interface CaptureDao {
 
     /**
      * Obtiene todos los registros ordenados por fecha descendente (el más reciente primero).
+     *
+     * @return Flujo reactivo que emite una nueva lista cada vez que cambian los datos en la tabla.
      */
     @Query("SELECT * FROM capture_records ORDER BY dateMillis DESC")
-    fun getAllRecords(): Flow<List<CaptureRecordEntity>> // flujo emite listas cada vez que los datos cambian en la tabla
+    fun getAllRecords(): Flow<List<CaptureRecordEntity>>
 
     /**
      * Elimina un registro específico.
